@@ -9,6 +9,7 @@ const path = require('path');
 const args = {};
 process.argv.slice(2).forEach((a, i, arr) => { if (a.startsWith('--')) args[a.slice(2)] = arr[i+1]; });
 const slug = args.slug;
+const capaStyle = (args.capa || 'a').toLowerCase(); // a, b, ou c
 if (!slug) { console.error('--slug obrigatório'); process.exit(1); }
 
 const ROOT = path.resolve(__dirname, '..');
@@ -31,7 +32,7 @@ raw.split('\n').forEach(line => {
 });
 if (cur) slides.push(cur);
 
-console.log(`\n  Build — ${slug} (${slides.length} slides)\n`);
+console.log(`\n  Build — ${slug} (${slides.length} slides, capa ${capaStyle.toUpperCase()})\n`);
 
 // Paths — capa.jpg pra slide 1, background.jpg pros internos
 const capaPath = `/posts/${slug}/assets/capa.jpg`;
@@ -41,7 +42,7 @@ function read(f) { return fs.readFileSync(path.join(TMPL, f), 'utf-8'); }
 // Slide 01 — Capa
 const s1 = slides.find(s => s.num === 1);
 if (s1) {
-  let h = read('capa-a.html')
+  let h = read(`capa-${capaStyle}.html`)
     .replace('{{ZONA_LABEL}}', s1.z.ZONA_LABEL || '')
     .replace('{{ZONA_HEADLINE_L1}}', s1.z.ZONA_HEADLINE_L1 || '')
     .replace('{{ZONA_HEADLINE_L2}}', s1.z.ZONA_HEADLINE_L2 || '')
