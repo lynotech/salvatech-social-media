@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Inter:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1080px; height: 1350px; overflow: hidden; background: #0a0414; font-family: 'Inter', sans-serif; }
+
+  .canvas { position: relative; width: 1080px; height: 1350px; overflow: hidden; }
+
+  .glow {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 500px; height: 500px;
+    background: radial-gradient(ellipse, rgba(151,85,255,0.38) 0%, transparent 70%);
+    z-index: 0;
+  }
+
+  .texto-topo {
+    position: relative; z-index: 2;
+    padding: 60px; text-align: center;
+  }
+  .label {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.15em;
+    text-transform: uppercase; color: #9755FF; margin-bottom: 16px;
+  }
+  .headline {
+    font-family: 'Black Han Sans', 'Impact', 'Arial Black', sans-serif;
+    font-weight: 900; font-size: 72px; line-height: 1.0;
+    text-transform: uppercase;
+  }
+  .headline .l1 { color: #ffffff; }
+  .headline .l2 { color: #9755FF; }
+
+  .imagem {
+    position: absolute; top: 25%; left: 0;
+    width: 100%; height: 55%;
+    object-fit: cover; object-position: center;
+    z-index: 1;
+  }
+
+  .sub-bottom {
+    position: absolute; bottom: 80px; width: 100%; text-align: center; z-index: 2;
+    font-size: 22px; color: #9980cc; letter-spacing: 0.05em; font-weight: 400;
+  }
+
+  .rodape {
+    position: absolute; bottom: 0; width: 100%; height: 64px; z-index: 3;
+    border-top: 1px solid rgba(151,85,255,0.35);
+    padding: 0 60px; display: flex; align-items: center; justify-content: space-between;
+    background: rgba(10,4,20,0.9);
+  }
+  .rodape .logo {
+    height: 28px; width: auto;
+  }
+  .rodape .num {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.15em;
+    text-transform: uppercase; color: #9980cc;
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="glow"></div>
+  <div class="texto-topo">
+    <div class="label">{{ZONA_LABEL}}</div>
+    <div class="headline">
+      <div class="l1">{{ZONA_HEADLINE_L1}}</div>
+      <div class="l2">{{ZONA_HEADLINE_L2}}</div>
+    </div>
+  </div>
+  <img class="imagem" src="{{CAPA_JPG_PATH}}" alt="">
+  <div class="sub-bottom">{{ZONA_SUB}}</div>
+  <div class="rodape">
+    <img class="logo" src="../../../logo.png" alt="SalvaTech">
+    <span class="num">01 / 07</span>
+  </div>
+</div>
+</body>
+</html>

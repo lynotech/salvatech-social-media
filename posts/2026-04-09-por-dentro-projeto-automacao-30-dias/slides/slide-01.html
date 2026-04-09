@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Inter:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1080px; height: 1350px; overflow: hidden; background: #0a0414; font-family: 'Inter', sans-serif; }
+
+  .canvas { position: relative; width: 1080px; height: 1350px; overflow: hidden; }
+
+  .texto {
+    position: relative; z-index: 2;
+    padding: 60px 60px 0;
+  }
+  .label {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.15em;
+    text-transform: uppercase; color: #9755FF; margin-bottom: 16px;
+  }
+  .headline {
+    font-family: 'Black Han Sans', 'Impact', 'Arial Black', sans-serif;
+    font-weight: 900; font-size: 96px; line-height: 1.0;
+    text-transform: uppercase;
+  }
+  .headline .l1 { color: #ffffff; }
+  .headline .l2 { color: #9755FF; }
+  .sub {
+    font-size: 22px; color: #9980cc; letter-spacing: 0.05em;
+    margin-top: 20px; font-weight: 400;
+  }
+
+  .glow {
+    position: absolute; bottom: 64px; left: 50%; transform: translateX(-50%);
+    width: 500px; height: 500px;
+    background: radial-gradient(ellipse, rgba(151,85,255,0.38) 0%, transparent 70%);
+    z-index: 0;
+  }
+
+  .imagem {
+    position: absolute; bottom: 64px; left: 0;
+    width: 100%; height: 62%;
+    object-fit: cover; object-position: bottom;
+    z-index: 1;
+  }
+
+  .rodape {
+    position: absolute; bottom: 0; width: 100%; height: 64px; z-index: 3;
+    border-top: 1px solid rgba(151,85,255,0.35);
+    padding: 0 60px; display: flex; align-items: center; justify-content: space-between;
+    background: rgba(10,4,20,0.9);
+  }
+  .rodape .logo {
+    height: 28px; width: auto;
+  }
+  .rodape .num {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.15em;
+    text-transform: uppercase; color: #9980cc;
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="texto">
+    <div class="label">CASE REAL</div>
+    <div class="headline">
+      <div class="l1">30 DIAS.</div>
+      <div class="l2">UMA EMPRESA TRANSFORMADA.</div>
+    </div>
+    <div class="sub">Do problema a solucao: veja como foi.</div>
+  </div>
+  <div class="glow"></div>
+  <img class="imagem" src="../assets/capa.jpg" alt="">
+  <div class="rodape">
+    <img class="logo" src="../../../logo.png" alt="SalvaTech">
+    <span class="num">01 / 07</span>
+  </div>
+</div>
+</body>
+</html>

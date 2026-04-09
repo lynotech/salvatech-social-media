@@ -1,0 +1,68 @@
+# SalvaTech — Pipeline de Produção
+#
+# O pipeline é dividido em 3 fases com momentos diferentes:
+#
+# FASE 1 — PLANEJAMENTO (1x por mês, início do mês)
+#   Pesquisa tendências e define os 8 temas do mês
+#   model_tier: powerful (precisa raciocinar)
+#
+# FASE 2 — COPY (1x por mês, após aprovação dos temas)
+#   Gera o copy de todos os 8 posts do mês
+#   model_tier: powerful (precisa de criatividade)
+#
+# FASE 3 — ARTES (1x por semana, toda segunda-feira)
+#   Gera imagens + monta slides + renderiza PNGs dos 2 posts da semana
+#   model_tier: standard/fast (mecânico, templates prontos)
+#
+# Economia: ~60-70% menos tokens vs rodar tudo junto toda semana
+
+# ═══════════════════════════════════════
+# FASE 1 — PLANEJAMENTO MENSAL
+# Rodar: "Inicia o planejamento do mês"
+# ═══════════════════════════════════════
+
+fase1:
+  - id: 01-pesquisa
+    file: steps/01-estrategista.md
+    model_tier: powerful
+    # Pesquisa tendências e define 8 temas para o mês
+
+  - id: 02-checkpoint-temas
+    file: steps/02-checkpoint-estrutura.md
+    # Humano aprova os 8 temas e composições
+
+# ═══════════════════════════════════════
+# FASE 2 — COPY MENSAL
+# Rodar: "Gera os copys do mês"
+# ═══════════════════════════════════════
+
+fase2:
+  - id: 03-copywriter
+    file: steps/03-copywriter.md
+    model_tier: powerful
+    # Gera copy de todos os 8 posts do mês
+
+  - id: 04-checkpoint-copy
+    file: steps/04-checkpoint-copy.md
+    # Humano aprova os copys
+
+# ═══════════════════════════════════════
+# FASE 3 — ARTES SEMANAIS
+# Rodar: "Gera as artes da semana"
+# ═══════════════════════════════════════
+
+fase3:
+  - id: 05-ilustrador
+    file: steps/05-ilustrador.md
+    model_tier: standard
+    # Gera capa.jpg + background.jpg dos 2 posts da semana
+
+  - id: 06-designer
+    file: steps/06-designer.md
+    model_tier: fast
+    # Monta slides HTML via templates (node pipeline/build-slides.js)
+
+  - id: 07-renderizador
+    file: steps/07-renderizador.md
+    model_tier: fast
+    # Renderiza HTMLs em PNGs via Playwright

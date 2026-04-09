@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SalvaTech — Squad Dashboard</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      background: #0a0414;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px; height: 52px;
+      border-bottom: 1px solid rgba(151,85,255,0.2);
+      background: rgba(17,8,32,0.8);
+    }
+    .header h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px; color: #9755FF; letter-spacing: 2px;
+    }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .conn-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      display: inline-block; margin-right: 6px;
+    }
+    .conn-dot.on  { background: #4ade80; }
+    .conn-dot.off { background: #e94560; }
+    .conn-label { font-size: 9px; color: #9980cc; }
+    .status-pill {
+      font-size: 10px; padding: 5px 12px; border-radius: 20px;
+      background: rgba(151,85,255,0.15); border: 1px solid rgba(151,85,255,0.3);
+      color: #c49aff; font-weight: 600;
+    }
+
+    /* ── LAYOUT ── */
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      height: calc(100vh - 52px);
+    }
+
+    /* ── OFFICE ── */
+    .office {
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+
+    /* ── FLOOR ── */
+    .office-floor {
+      position: relative;
+      width: 560px; height: 400px;
+      image-rendering: pixelated;
+      background:
+        repeating-conic-gradient(
+          rgba(151,85,255,0.03) 0% 25%,
+          rgba(10,4,20,0) 0% 50%
+        ) 0 0 / 40px 40px;
+      border: 1px solid rgba(151,85,255,0.08);
+      border-radius: 8px;
+    }
+    /* subtle glow under the floor */
+    .office-floor::before {
+      content: '';
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px; height: 300px;
+      background: radial-gradient(ellipse, rgba(151,85,255,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── STATION ── */
+    .station {
+      position: absolute; display: flex; flex-direction: column; align-items: center;
+      cursor: pointer; transition: transform 0.15s;
+    }
+    .station:hover { transform: scale(1.08); }
+    .station img { image-rendering: pixelated; pointer-events: none; }
+    .station .sprite-char { width: 48px; height: 48px; position: relative; z-index: 2; }
+    .station .sprite-desk { width: 72px; height: 48px; position: relative; z-index: 1; margin-top: -12px; }
+    .agent-label {
+      font-family: 'Press Start 2P', monospace; font-size: 6px;
+      margin-top: 4px; padding: 2px 6px; border-radius: 3px;
+      background: rgba(17,8,32,0.9); border: 1px solid rgba(151,85,255,0.25);
+      white-space: nowrap; text-align: center; letter-spacing: 0.5px;
+    }
+    .agent-label .icon { margin-right: 3px; }
+
+    /* ── STATUS DOT ── */
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-left: 4px; }
+    .status-dot.idle    { background: #444; }
+    .status-dot.working { background: #9755FF; animation: pulse 1s infinite; }
+    .status-dot.done    { background: #4ade80; }
+    .status-dot.error   { background: #e94560; }
+    .status-dot.waiting { background: #f59e0b; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* ── WORKING BOUNCE ── */
+    @keyframes bounce {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    /* Workers (static sprites) bounce when active */
+    .station.active .sprite-char { animation: bounce 0.6s ease-in-out infinite; }
+
+    /* ── SPRITE SHEET ANIMATION ── */
+    .sprite-sheet {
+      position: relative; z-index: 2;
+      overflow: hidden;
+      image-rendering: pixelated;
+    }
+    .sprite-sheet img {
+      image-rendering: pixelated;
+      pointer-events: none;
+      display: block;
+    }
+    /* Julia_PC: 384x64, 6 frames of 64x64 */
+    .sprite-julia-pc {
+      width: 96px; height: 96px;
+    }
+    .sprite-julia-pc img {
+      width: 576px; height: 96px;
+    }
+    /* Animate only when station is active */
+    .station.active .sprite-julia-pc img {
+      animation: julia-pc-anim 0.8s steps(6) infinite;
+    }
+    @keyframes julia-pc-anim {
+      from { transform: translateX(0); }
+      to { transform: translateX(-576px); }
+    }
+
+    /* Julia.png: 128x32, 4 frames of 32x32, scaled 2x to 64x64 */
+    .sprite-julia {
+      width: 64px; height: 64px;
+    }
+    .sprite-julia img {
+      width: 256px; height: 64px;
+    }
+    .station.active .sprite-julia img {
+      animation: julia-walk 0.5s steps(4) infinite;
+    }
+    @keyframes julia-walk {
+      from { transform: translateX(0); }
+      to { transform: translateX(-256px); }
+    }
+
+    /* ── BUBBLE ── */
+    .bubble {
+      position: absolute; top: -36px; left: 50%; transform: translateX(-50%);
+      background: #110820; border: 1px solid rgba(151,85,255,0.4); border-radius: 6px;
+      padding: 3px 8px; font-size: 7px; font-family: 'Press Start 2P', monospace;
+      color: #c49aff; white-space: nowrap; opacity: 0; transition: opacity 0.3s;
+      pointer-events: none; z-index: 10;
+    }
+    .bubble::after {
+      content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+      border-left: 5px solid transparent; border-right: 5px solid transparent;
+      border-top: 5px solid rgba(151,85,255,0.4);
+    }
+    .station:hover .bubble, .station.active .bubble { opacity: 1; }
+    .station.waiting .bubble { opacity: 1; }
+
+    /* ── DECO ── */
+    .deco { position: absolute; image-rendering: pixelated; pointer-events: none; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: rgba(17,8,32,0.6);
+      border-left: 1px solid rgba(151,85,255,0.15);
+      display: flex; flex-direction: column;
+      height: 100%; overflow: hidden;
+    }
+    .sidebar-scroll {
+      flex: 1; overflow-y: auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(151,85,255,0.3); border-radius: 2px; }
+
+    .sidebar h2 {
+      font-family: 'Press Start 2P', monospace; font-size: 8px;
+      color: #9755FF; letter-spacing: 1px;
+    }
+
+    /* ── PIPELINE ── */
+    .pipeline { display: flex; flex-direction: column; gap: 5px; }
+    .step {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px; border-radius: 6px;
+      background: rgba(10,4,20,0.6); border: 1px solid rgba(151,85,255,0.08);
+      transition: all 0.3s;
+    }
+    .step.active  { border-color: #9755FF; background: rgba(151,85,255,0.08); }
+    .step.done    { border-color: rgba(74,222,128,0.3); background: rgba(74,222,128,0.05); }
+    .step.waiting { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.05); }
+    .step-num {
+      font-family: 'Press Start 2P', monospace; font-size: 7px; color: #444; min-width: 18px;
+    }
+    .step.active .step-num  { color: #9755FF; }
+    .step.done .step-num    { color: #4ade80; }
+    .step.waiting .step-num { color: #f59e0b; }
+    .step-name { font-size: 11px; font-weight: 600; color: #9980cc; flex: 1; }
+    .step.active .step-name  { color: #fff; }
+    .step.done .step-name    { color: #c49aff; }
+    .step.waiting .step-name { color: #f59e0b; }
+    .step-icon { font-size: 12px; }
+
+    /* ── POST INFO ── */
+    .post-info {
+      background: rgba(10,4,20,0.6); border: 1px solid rgba(151,85,255,0.12);
+      border-radius: 8px; padding: 12px;
+    }
+    .post-info h3 {
+      font-size: 9px; color: #9980cc; margin-bottom: 5px;
+      font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .post-info .value { font-size: 12px; color: #fff; line-height: 1.4; }
+    .post-info .value.muted { color: #9980cc; font-style: italic; }
+
+    /* ── LOG ── */
+    .log-box {
+      background: rgba(10,4,20,0.8); border: 1px solid rgba(151,85,255,0.08);
+      border-radius: 6px; padding: 10px; flex: 1; min-height: 100px; overflow-y: auto;
+      font-family: 'Inter', monospace; font-size: 11px; line-height: 1.7; color: #9980cc;
+    }
+    .log-box::-webkit-scrollbar { width: 3px; }
+    .log-box::-webkit-scrollbar-thumb { background: rgba(151,85,255,0.2); border-radius: 2px; }
+    .log-entry { margin-bottom: 1px; }
+    .log-time  { color: #444; }
+    .log-agent { color: #9755FF; }
+    .log-ok    { color: #4ade80; }
+    .log-err   { color: #e94560; }
+    .log-warn  { color: #f59e0b; }
+
+    /* ── ACTIONS ── */
+    .sidebar-footer {
+      padding: 12px 16px;
+      border-top: 1px solid rgba(151,85,255,0.1);
+    }
+    .btn {
+      width: 100%;
+      font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+      padding: 10px 14px; border: 1px solid rgba(151,85,255,0.3); border-radius: 6px;
+      background: rgba(151,85,255,0.08); color: #c49aff; cursor: pointer;
+      text-align: center; transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(151,85,255,0.2); color: #fff; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1><img src="logo.png" alt="SalvaTech" style="height:28px;image-rendering:auto;vertical-align:middle;"></h1>
+  <div class="header-right">
+    <span><span class="conn-dot off" id="connDot"></span><span class="conn-label" id="connLabel">Offline</span></span>
+    <div class="status-pill" id="globalStatus">IDLE</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="office">
+    <div class="office-floor">
+
+      <!-- DECO -->
+      <img class="deco" src="free-office-pixel-art/plant.png"        style="width:32px;height:32px;left:8px;top:8px;" alt="">
+      <img class="deco" src="free-office-pixel-art/water-cooler.png"  style="width:28px;height:40px;right:8px;top:8px;" alt="">
+      <img class="deco" src="free-office-pixel-art/coffee-maker.png"  style="width:28px;height:36px;right:8px;bottom:40px;" alt="">
+      <img class="deco" src="free-office-pixel-art/plant.png"         style="width:32px;height:32px;left:8px;bottom:40px;" alt="">
+      <img class="deco" src="free-office-pixel-art/printer.png"       style="width:36px;height:36px;left:256px;bottom:8px;" alt="">
+      <img class="deco" src="free-office-pixel-art/Trash.png"         style="width:20px;height:20px;left:310px;bottom:12px;" alt="">
+      <img class="deco" src="free-office-pixel-art/cabinet.png"       style="width:36px;height:44px;left:256px;top:4px;" alt="">
+
+      <!-- ORQUESTRADOR (center top) -->
+      <div class="station" id="st-orquestrador" style="left:236px;top:16px;">
+        <div class="bubble" id="bub-orquestrador">...</div>
+        <img class="sprite-char" src="free-office-pixel-art/boss.png" alt="">
+        <img class="sprite-desk" src="free-office-pixel-art/stamping-table.png" alt="">
+        <div class="agent-label"><span class="icon">🚀</span>ORQUESTRADOR<span class="status-dot idle" id="dot-orquestrador"></span></div>
+      </div>
+
+      <!-- ESTRATEGISTA (left) -->
+      <div class="station" id="st-estrategista" style="left:60px;top:120px;">
+        <div class="bubble" id="bub-estrategista">...</div>
+        <img class="sprite-char" src="free-office-pixel-art/Julia_Drinking_Coffee.png" alt="" style="width:48px;height:48px;object-fit:cover;object-position:left;">
+        <img class="sprite-desk" src="free-office-pixel-art/desk-with-pc.png" alt="">
+        <div class="agent-label"><span class="icon">🧠</span>ESTRATEGISTA<span class="status-dot idle" id="dot-estrategista"></span></div>
+      </div>
+
+      <!-- COPYWRITER (right) -->
+      <div class="station" id="st-copywriter" style="left:400px;top:120px;">
+        <div class="bubble" id="bub-copywriter">...</div>
+        <img class="sprite-char" src="free-office-pixel-art/worker1.png" alt="">
+        <img class="sprite-desk" src="free-office-pixel-art/writing-table.png" alt="">
+        <div class="agent-label"><span class="icon">✍️</span>COPYWRITER<span class="status-dot idle" id="dot-copywriter"></span></div>
+      </div>
+
+      <!-- ILUSTRADOR (bottom-left) -->
+      <div class="station" id="st-ilustrador" style="left:60px;top:260px;">
+        <div class="bubble" id="bub-ilustrador">...</div>
+        <img class="sprite-char" src="free-office-pixel-art/worker2.png" alt="">
+        <img class="sprite-desk" src="free-office-pixel-art/desk-with-pc.png" alt="">
+        <div class="agent-label"><span class="icon">🐒</span>ILUSTRADOR<span class="status-dot idle" id="dot-ilustrador"></span></div>
+      </div>
+
+      <!-- DESIGNER (bottom-right) -->
+      <div class="station" id="st-designer" style="left:400px;top:260px;">
+        <div class="bubble" id="bub-designer">...</div>
+        <img class="sprite-char" src="free-office-pixel-art/worker4.png" alt="">
+        <img class="sprite-desk" src="free-office-pixel-art/desk-with-pc.png" alt="">
+        <div class="agent-label"><span class="icon">🎨</span>DESIGNER<span class="status-dot idle" id="dot-designer"></span></div>
+      </div>
+
+      <!-- PARTITIONS -->
+      <img class="deco" src="free-office-pixel-art/office-partitions-1.png" style="width:48px;height:60px;left:190px;top:130px;opacity:0.4;" alt="">
+      <img class="deco" src="free-office-pixel-art/office-partitions-2.png" style="width:48px;height:60px;left:340px;top:130px;opacity:0.4;" alt="">
+      <img class="deco" src="free-office-pixel-art/office-partitions-1.png" style="width:48px;height:60px;left:190px;top:270px;opacity:0.4;" alt="">
+      <img class="deco" src="free-office-pixel-art/office-partitions-2.png" style="width:48px;height:60px;left:340px;top:270px;opacity:0.4;" alt="">
+
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-scroll">
+
+      <h2>📅 FASE 1 — MENSAL</h2>
+      <div class="pipeline">
+        <div class="step" id="step-1"><span class="step-num">01</span><span class="step-name">Pesquisa + 8 temas</span><span class="step-icon">🧠</span></div>
+        <div class="step" id="step-2"><span class="step-num">02</span><span class="step-name">Aprovação temas</span><span class="step-icon">✋</span></div>
+        <div class="step" id="step-3"><span class="step-num">03</span><span class="step-name">Copy (8 posts)</span><span class="step-icon">✍️</span></div>
+        <div class="step" id="step-4"><span class="step-num">04</span><span class="step-name">Aprovação copys</span><span class="step-icon">✋</span></div>
+      </div>
+
+      <h2>🎨 FASE 2 — SEMANAL</h2>
+      <div class="pipeline">
+        <div class="step" id="step-5"><span class="step-num">05</span><span class="step-name">Ilustrador (2 posts)</span><span class="step-icon">🐒</span></div>
+        <div class="step" id="step-6"><span class="step-num">06</span><span class="step-name">Designer (slides)</span><span class="step-icon">🎨</span></div>
+        <div class="step" id="step-7"><span class="step-num">07</span><span class="step-name">Renderizador (PNGs)</span><span class="step-icon">🖼️</span></div>
+      </div>
+
+      <div class="post-info">
+        <h3>Semana</h3>
+        <div class="value muted" id="postTema">Nenhum post em produção</div>
+      </div>
+      <div class="post-info">
+        <h3>Composição</h3>
+        <div class="value muted" id="postComp">—</div>
+      </div>
+
+      <h2>📜 LOG</h2>
+      <div class="log-box" id="logBox">
+        <div class="log-entry"><span class="log-time">--:--</span> Aguardando conexão...</div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="btn" id="btnPlan" onclick="startPlanejamento()">Iniciar planejamento do mês</button>
+      <button class="btn" id="btnArtes" onclick="startArtes()" style="margin-top:6px;">Gerar artes da semana</button>
+      <button class="btn secondary" onclick="resetDashboard()" style="margin-top:6px;">↺ Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHECKPOINT MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Checkpoint — Aprovação</span>
+    </div>
+    <div class="modal-question" id="modalQuestion"></div>
+    <div class="modal-items" id="modalItems"></div>
+    <textarea class="modal-input" id="modalInput" placeholder="Escreva sua sugestão de ajuste aqui... (deixe vazio pra aprovar direto)"></textarea>
+    <div class="modal-actions">
+      <button class="modal-btn approve" onclick="respondCheckpoint(true)">Aprovar</button>
+      <button class="modal-btn adjust" onclick="respondCheckpoint(false)">Pedir ajuste</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(10,4,20,0.85); z-index: 100;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.visible { display: flex; }
+  .modal {
+    background: #110820; border: 1px solid rgba(151,85,255,0.3);
+    border-radius: 12px; padding: 28px; width: 500px; max-width: 90vw;
+    max-height: 80vh; overflow-y: auto;
+    box-shadow: 0 0 80px rgba(151,85,255,0.1);
+  }
+  .modal::-webkit-scrollbar { width: 4px; }
+  .modal::-webkit-scrollbar-thumb { background: rgba(151,85,255,0.3); border-radius: 2px; }
+  .modal-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+    padding-bottom: 14px; border-bottom: 1px solid rgba(151,85,255,0.12);
+  }
+  .modal-title {
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700;
+    color: #f59e0b; letter-spacing: 0.5px;
+  }
+  .modal-question {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px; color: #c49aff; line-height: 1.6; margin-bottom: 16px;
+  }
+  .modal-items {
+    display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;
+  }
+  .modal-item {
+    background: rgba(10,4,20,0.6); border: 1px solid rgba(151,85,255,0.12);
+    border-radius: 6px; padding: 10px 12px;
+    font-family: 'Inter', sans-serif; font-size: 12px; color: #9980cc; line-height: 1.5;
+  }
+  .modal-item strong { color: #fff; }
+  .modal-input {
+    width: 100%; min-height: 60px; padding: 12px; border-radius: 8px;
+    background: rgba(10,4,20,0.8); border: 1px solid rgba(151,85,255,0.15);
+    color: #fff; font-family: 'Inter', sans-serif; font-size: 12px;
+    resize: vertical; outline: none; margin-bottom: 16px;
+  }
+  .modal-input:focus { border-color: #9755FF; }
+  .modal-input::placeholder { color: #444; }
+  .modal-actions { display: flex; gap: 10px; }
+  .modal-btn {
+    flex: 1; padding: 11px; border-radius: 8px; border: none;
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .modal-btn.approve {
+    background: rgba(74,222,128,0.12); color: #4ade80;
+    border: 1px solid rgba(74,222,128,0.25);
+  }
+  .modal-btn.approve:hover { background: rgba(74,222,128,0.25); }
+  .modal-btn.adjust {
+    background: rgba(245,158,11,0.12); color: #f59e0b;
+    border: 1px solid rgba(245,158,11,0.25);
+  }
+  .modal-btn.adjust:hover { background: rgba(245,158,11,0.25); }
+</style>
+
+<script>
+let ws = null;
+
+function connect() {
+  const host = window.location.host || 'localhost:3737';
+  ws = new WebSocket(`ws://${host}`);
+  ws.onopen = () => {
+    document.getElementById('connDot').className = 'conn-dot on';
+    document.getElementById('connLabel').textContent = 'Conectado';
+    addLogEntry('--:--', 'Conectado ao servidor', 'ok');
+  };
+  ws.onclose = () => {
+    document.getElementById('connDot').className = 'conn-dot off';
+    document.getElementById('connLabel').textContent = 'Offline';
+    setTimeout(connect, 3000);
+  };
+  ws.onerror = () => ws.close();
+  ws.onmessage = (evt) => {
+    const data = JSON.parse(evt.data);
+    if (data.type === 'checkpoint') showCheckpoint(data.state.checkpoint);
+    if (data.state) applyState(data.state);
+  };
+}
+
+function applyState(s) {
+  const labels = { idle:'IDLE', running:'EM PRODUÇÃO', checkpoint:'CHECKPOINT', done:'CONCLUÍDO', error:'ERRO' };
+  document.getElementById('globalStatus').textContent = labels[s.pipeline] || s.pipeline;
+
+  const temaEl = document.getElementById('postTema');
+  const compEl = document.getElementById('postComp');
+  temaEl.textContent = s.tema || 'Nenhum post em produção';
+  temaEl.classList.toggle('muted', !s.tema);
+  compEl.textContent = s.composicao || '—';
+  compEl.classList.toggle('muted', !s.composicao);
+
+  Object.keys(s.agents).forEach(name => {
+    const a = s.agents[name];
+    const dot = document.getElementById('dot-' + name);
+    const bub = document.getElementById('bub-' + name);
+    const st  = document.getElementById('st-' + name);
+    if (dot) dot.className = 'status-dot ' + (a.status || 'idle');
+    if (bub) bub.textContent = a.message || '...';
+    if (st) {
+      st.classList.toggle('active', a.status === 'working');
+      st.classList.toggle('waiting', a.status === 'waiting');
+    }
+  });
+
+  Object.keys(s.steps).forEach(num => {
+    const el = document.getElementById('step-' + num);
+    if (!el) return;
+    el.className = 'step';
+    const st = s.steps[num];
+    if (st === 'active' || st === 'working') el.classList.add('active');
+    else if (st === 'done') el.classList.add('done');
+    else if (st === 'waiting') el.classList.add('waiting');
+  });
+
+  if (s.log && s.log.length) {
+    const box = document.getElementById('logBox');
+    box.innerHTML = s.log.map(l =>
+      `<div class="log-entry"><span class="log-time">${l.time}</span> <span class="log-${l.type||''}">${l.msg}</span></div>`
+    ).join('');
+    box.scrollTop = box.scrollHeight;
+  }
+
+  // Show checkpoint modal if pending
+  if (s.checkpoint && !s.checkpoint.responded) {
+    showCheckpoint(s.checkpoint);
+  }
+}
+
+function showCheckpoint(cp) {
+  if (!cp) return;
+  document.getElementById('modalQuestion').textContent = cp.question;
+  const itemsEl = document.getElementById('modalItems');
+  itemsEl.innerHTML = '';
+  if (cp.items && cp.items.length) {
+    cp.items.forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'modal-item';
+      div.innerHTML = typeof item === 'string' ? item : `<strong>${i+1}.</strong> ${item.tema || item.text || JSON.stringify(item)}`;
+      itemsEl.appendChild(div);
+    });
+  }
+  document.getElementById('modalInput').value = '';
+  document.getElementById('modalOverlay').classList.add('visible');
+}
+
+function respondCheckpoint(approved) {
+  const feedback = document.getElementById('modalInput').value.trim();
+  if (!approved && !feedback) {
+    document.getElementById('modalInput').focus();
+    document.getElementById('modalInput').style.borderColor = '#e94560';
+    return;
+  }
+  fetch('/api/checkpoint/respond', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ approved, feedback })
+  }).then(() => {
+    document.getElementById('modalOverlay').classList.remove('visible');
+    document.getElementById('modalInput').style.borderColor = '';
+  }).catch(() => {});
+}
+
+function addLogEntry(time, msg, type) {
+  const box = document.getElementById('logBox');
+  box.innerHTML += `<div class="log-entry"><span class="log-time">${time}</span> <span class="log-${type||''}">${msg}</span></div>`;
+  box.scrollTop = box.scrollHeight;
+}
+
+function resetDashboard() { fetch('/api/reset', { method: 'POST' }).catch(() => {}); }
+
+function startPlanejamento() {
+  fetch('/api/command', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ command: 'planejamento' })
+  }).catch(() => {});
+}
+
+function startArtes() {
+  fetch('/api/command', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ command: 'artes' })
+  }).catch(() => {});
+}
+
+connect();
+</script>
+</body>
+</html>
