@@ -1,417 +1,221 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SalvaTech — Squad Dashboard</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700&display=swap');
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; overflow: hidden; }
-    body {
-      background: #0a0414;
-      color: #fff;
-      font-family: 'Inter', sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SalvaTech · Agent Room</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#000;font-family:'Syne',sans-serif;overflow:hidden;width:100vw;height:100vh}
 
-    /* ── HEADER ── */
-    .header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 24px; height: 52px;
-      border-bottom: 1px solid rgba(151,85,255,0.2);
-      background: rgba(17,8,32,0.8);
-    }
-    .header h1 {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 12px; color: #9755FF; letter-spacing: 2px;
-    }
-    .header-right { display: flex; align-items: center; gap: 12px; }
-    .conn-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      display: inline-block; margin-right: 6px;
-    }
-    .conn-dot.on  { background: #4ade80; }
-    .conn-dot.off { background: #e94560; }
-    .conn-label { font-size: 9px; color: #9980cc; }
-    .status-pill {
-      font-size: 10px; padding: 5px 12px; border-radius: 20px;
-      background: rgba(151,85,255,0.15); border: 1px solid rgba(151,85,255,0.3);
-      color: #c49aff; font-weight: 600;
-    }
+  .scene{position:relative;width:100vw;height:100vh;overflow:hidden}
+  .layer{position:absolute;top:0;left:0;width:100%;height:100%}
+  .layer img{width:100%;height:100%;object-fit:cover}
 
-    /* ── LAYOUT ── */
-    .main {
-      display: grid;
-      grid-template-columns: 1fr 300px;
-      height: calc(100vh - 52px);
-    }
+  /* Effects */
+  .scanlines{position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.02) 2px,rgba(0,0,0,.02) 4px);pointer-events:none;z-index:10}
+  .vignette{position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.5) 100%);pointer-events:none;z-index:8}
 
-    /* ── OFFICE ── */
-    .office {
-      display: flex; align-items: center; justify-content: center;
-      position: relative; overflow: hidden;
-    }
+  /* HUD */
+  .hud{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:20}
 
-    /* ── FLOOR ── */
-    .office-floor {
-      position: relative;
-      width: 560px; height: 400px;
-      image-rendering: pixelated;
-      background:
-        repeating-conic-gradient(
-          rgba(151,85,255,0.03) 0% 25%,
-          rgba(10,4,20,0) 0% 50%
-        ) 0 0 / 40px 40px;
-      border: 1px solid rgba(151,85,255,0.08);
-      border-radius: 8px;
-    }
-    /* subtle glow under the floor */
-    .office-floor::before {
-      content: '';
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 400px; height: 300px;
-      background: radial-gradient(ellipse, rgba(151,85,255,0.07) 0%, transparent 70%);
-      pointer-events: none;
-    }
+  /* Topbar */
+  .topbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:linear-gradient(to bottom,rgba(0,0,0,.75) 0%,transparent 100%);pointer-events:all}
+  .logo-area{display:flex;align-items:center;gap:12px}
+  .logo-area img{height:40px;width:auto}
+  .topbar-right{display:flex;align-items:center;gap:10px}
+  .pill{display:flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid rgba(255,255,255,.12);border-radius:20px;font-size:11px;font-family:'DM Mono',monospace;color:rgba(255,255,255,.5);background:rgba(0,0,0,.5);backdrop-filter:blur(10px)}
+  .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+  .dg{background:#22d687;box-shadow:0 0 8px #22d687}
+  .da{background:#f5a623;box-shadow:0 0 8px #f5a623}
+  .dp{background:#9755FF;box-shadow:0 0 8px #9755FF;animation:pd 1.5s infinite}
+  .dr{background:#e94560;box-shadow:0 0 8px #e94560}
+  @keyframes pd{0%,100%{opacity:1}50%{opacity:.4}}
 
-    /* ── STATION ── */
-    .station {
-      position: absolute; display: flex; flex-direction: column; align-items: center;
-      cursor: pointer; transition: transform 0.15s;
-    }
-    .station:hover { transform: scale(1.08); }
-    .station img { image-rendering: pixelated; pointer-events: none; }
-    .station .sprite-char { width: 48px; height: 48px; position: relative; z-index: 2; }
-    .station .sprite-desk { width: 72px; height: 48px; position: relative; z-index: 1; margin-top: -12px; }
-    .agent-label {
-      font-family: 'Press Start 2P', monospace; font-size: 6px;
-      margin-top: 4px; padding: 2px 6px; border-radius: 3px;
-      background: rgba(17,8,32,0.9); border: 1px solid rgba(151,85,255,0.25);
-      white-space: nowrap; text-align: center; letter-spacing: 0.5px;
-    }
-    .agent-label .icon { margin-right: 3px; }
+  /* Agent characters */
+  .agent-char{position:absolute;z-index:6;image-rendering:auto}
+  .agent-char img{height:100%;width:auto;image-rendering:auto}
+  #char-boss{bottom:18%;left:30%;height:38%}
+  #char-estrategista{bottom:22%;left:2%;height:30%}
+  #char-designer{bottom:20%;left:42%;height:32%}
+  #char-copywriter{bottom:22%;right:22%;height:30%}
+  #char-analista{bottom:20%;right:2%;height:28%}
 
-    /* ── STATUS DOT ── */
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-left: 4px; }
-    .status-dot.idle    { background: #444; }
-    .status-dot.working { background: #9755FF; animation: pulse 1s infinite; }
-    .status-dot.done    { background: #4ade80; }
-    .status-dot.error   { background: #e94560; }
-    .status-dot.waiting { background: #f59e0b; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  /* Desk */
+  #mesa-central{position:absolute;bottom:10%;left:50%;transform:translateX(-50%);height:22%;z-index:4}
+  #mesa-central img{height:100%;width:auto}
 
-    /* ── WORKING BOUNCE ── */
-    @keyframes bounce {
-      0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
-    }
-    /* Workers (static sprites) bounce when active */
-    .station.active .sprite-char { animation: bounce 0.6s ease-in-out infinite; }
+  /* Bounce animation for working agents */
+  .agent-char.working img{animation:bounce .8s ease-in-out infinite}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
-    /* ── SPRITE SHEET ANIMATION ── */
-    .sprite-sheet {
-      position: relative; z-index: 2;
-      overflow: hidden;
-      image-rendering: pixelated;
-    }
-    .sprite-sheet img {
-      image-rendering: pixelated;
-      pointer-events: none;
-      display: block;
-    }
-    /* Julia_PC: 384x64, 6 frames of 64x64 */
-    .sprite-julia-pc {
-      width: 96px; height: 96px;
-    }
-    .sprite-julia-pc img {
-      width: 576px; height: 96px;
-    }
-    /* Animate only when station is active */
-    .station.active .sprite-julia-pc img {
-      animation: julia-pc-anim 0.8s steps(6) infinite;
-    }
-    @keyframes julia-pc-anim {
-      from { transform: translateX(0); }
-      to { transform: translateX(-576px); }
-    }
+  /* Tags */
+  .tag{position:absolute;pointer-events:all;cursor:pointer;z-index:25}
+  .tag-inner{background:rgba(0,0,0,.78);border:1px solid rgba(151,85,255,.5);border-radius:8px;padding:5px 10px;backdrop-filter:blur(8px);white-space:nowrap;transition:all .2s}
+  .tag:hover .tag-inner{background:rgba(151,85,255,.2);border-color:#9755FF;box-shadow:0 0 16px rgba(151,85,255,.4)}
+  .tag-name{font-size:11px;font-weight:700;color:#fff;display:flex;align-items:center;gap:5px}
+  .tag-role{font-size:9px;color:#8b84a8;font-family:'DM Mono',monospace;margin-top:1px}
+  .tag-status{font-size:9px;font-family:'DM Mono',monospace;margin-top:3px;display:flex;align-items:center;gap:4px}
 
-    /* Julia.png: 128x32, 4 frames of 32x32, scaled 2x to 64x64 */
-    .sprite-julia {
-      width: 64px; height: 64px;
-    }
-    .sprite-julia img {
-      width: 256px; height: 64px;
-    }
-    .station.active .sprite-julia img {
-      animation: julia-walk 0.5s steps(4) infinite;
-    }
-    @keyframes julia-walk {
-      from { transform: translateX(0); }
-      to { transform: translateX(-256px); }
-    }
+  /* Bubbles */
+  .bubble{position:absolute;z-index:30;pointer-events:none;opacity:0;transform:translateY(6px) scale(.9);transition:opacity .3s,transform .3s}
+  .bubble.show{opacity:1;transform:translateY(0) scale(1)}
+  .bubble-inner{background:rgba(8,6,18,.93);border:1px solid rgba(151,85,255,.5);border-radius:10px;padding:8px 12px;max-width:220px;font-size:11px;color:rgba(255,255,255,.85);line-height:1.5;font-family:'DM Mono',monospace;box-shadow:0 0 20px rgba(151,85,255,.2)}
+  .bubble-inner::after{content:'';position:absolute;bottom:-6px;left:16px;width:10px;height:6px;background:rgba(8,6,18,.93);clip-path:polygon(0 0,100% 0,50% 100%)}
+  .bubble-author{font-size:9px;color:#9755FF;font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em}
 
-    /* ── BUBBLE ── */
-    .bubble {
-      position: absolute; top: -36px; left: 50%; transform: translateX(-50%);
-      background: #110820; border: 1px solid rgba(151,85,255,0.4); border-radius: 6px;
-      padding: 3px 8px; font-size: 7px; font-family: 'Press Start 2P', monospace;
-      color: #c49aff; white-space: nowrap; opacity: 0; transition: opacity 0.3s;
-      pointer-events: none; z-index: 10;
-    }
-    .bubble::after {
-      content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
-      border-left: 5px solid transparent; border-right: 5px solid transparent;
-      border-top: 5px solid rgba(151,85,255,0.4);
-    }
-    .station:hover .bubble, .station.active .bubble { opacity: 1; }
-    .station.waiting .bubble { opacity: 1; }
+  /* Side panel */
+  .sidepanel{position:absolute;right:0;top:50%;transform:translateY(-50%);width:170px;display:flex;flex-direction:column;gap:6px;padding:12px;pointer-events:all;z-index:25}
+  .acard{background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 10px;cursor:pointer;transition:all .2s;backdrop-filter:blur(12px)}
+  .acard:hover,.acard.active{border-color:#9755FF;background:rgba(151,85,255,.15);box-shadow:0 0 14px rgba(151,85,255,.3)}
+  .acard-name{font-size:11px;font-weight:700;color:#fff}
+  .acard-task{font-size:9px;color:#8b84a8;font-family:'DM Mono',monospace;margin-top:2px}
+  .acard-bar{height:2px;background:rgba(255,255,255,.08);border-radius:1px;margin-top:5px;overflow:hidden}
+  .acard-fill{height:100%;border-radius:1px;background:#9755FF;transition:width .6s}
 
-    /* ── DECO ── */
-    .deco { position: absolute; image-rendering: pixelated; pointer-events: none; }
+  /* Bottom bar */
+  .bottombar{position:absolute;bottom:0;left:0;right:0;padding:10px 20px;background:linear-gradient(to top,rgba(0,0,0,.7) 0%,transparent 100%);display:flex;align-items:center;justify-content:space-between;pointer-events:all;z-index:25}
+  .bottom-left{display:flex;align-items:center;gap:12px}
+  .log-mini{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.4);max-width:500px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .action-row{display:flex;gap:6px;align-items:center}
+  .action-select{padding:7px 28px 7px 10px;border-radius:6px;background:rgba(0,0,0,.6);border:1px solid rgba(151,85,255,.2);color:#c49aff;font-family:'DM Mono',monospace;font-size:10px;outline:none;cursor:pointer;appearance:none;backdrop-filter:blur(8px);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%239755FF' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+  .action-select option{background:#110820;color:#c49aff}
+  .btn-go{padding:7px 16px;border-radius:6px;border:none;background:#9755FF;color:#fff;font-family:'DM Mono',monospace;font-size:10px;font-weight:500;cursor:pointer;transition:background .2s}
+  .btn-go:hover{background:#7a3de8}
 
-    /* ── SIDEBAR ── */
-    .sidebar {
-      background: rgba(17,8,32,0.6);
-      border-left: 1px solid rgba(151,85,255,0.15);
-      display: flex; flex-direction: column;
-      height: 100%; overflow: hidden;
-    }
-    .sidebar-scroll {
-      flex: 1; overflow-y: auto; padding: 16px;
-      display: flex; flex-direction: column; gap: 14px;
-    }
-    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
-    .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-    .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(151,85,255,0.3); border-radius: 2px; }
-
-    .sidebar h2 {
-      font-family: 'Press Start 2P', monospace; font-size: 8px;
-      color: #9755FF; letter-spacing: 1px;
-    }
-
-    /* ── PIPELINE ── */
-    .pipeline { display: flex; flex-direction: column; gap: 5px; }
-    .step {
-      display: flex; align-items: center; gap: 8px;
-      padding: 7px 10px; border-radius: 6px;
-      background: rgba(10,4,20,0.6); border: 1px solid rgba(151,85,255,0.08);
-      transition: all 0.3s;
-    }
-    .step.active  { border-color: #9755FF; background: rgba(151,85,255,0.08); }
-    .step.done    { border-color: rgba(74,222,128,0.3); background: rgba(74,222,128,0.05); }
-    .step.waiting { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.05); }
-    .step-num {
-      font-family: 'Press Start 2P', monospace; font-size: 7px; color: #444; min-width: 18px;
-    }
-    .step.active .step-num  { color: #9755FF; }
-    .step.done .step-num    { color: #4ade80; }
-    .step.waiting .step-num { color: #f59e0b; }
-    .step-name { font-size: 11px; font-weight: 600; color: #9980cc; flex: 1; }
-    .step.active .step-name  { color: #fff; }
-    .step.done .step-name    { color: #c49aff; }
-    .step.waiting .step-name { color: #f59e0b; }
-    .step-icon { font-size: 12px; }
-
-    /* ── POST INFO ── */
-    .post-info {
-      background: rgba(10,4,20,0.6); border: 1px solid rgba(151,85,255,0.12);
-      border-radius: 8px; padding: 12px;
-    }
-    .post-info h3 {
-      font-size: 9px; color: #9980cc; margin-bottom: 5px;
-      font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
-    }
-    .post-info .value { font-size: 12px; color: #fff; line-height: 1.4; }
-    .post-info .value.muted { color: #9980cc; font-style: italic; }
-
-    /* ── LOG ── */
-    .log-box {
-      background: rgba(10,4,20,0.8); border: 1px solid rgba(151,85,255,0.08);
-      border-radius: 6px; padding: 10px; flex: 1; min-height: 100px; overflow-y: auto;
-      font-family: 'Inter', monospace; font-size: 11px; line-height: 1.7; color: #9980cc;
-    }
-    .log-box::-webkit-scrollbar { width: 3px; }
-    .log-box::-webkit-scrollbar-thumb { background: rgba(151,85,255,0.2); border-radius: 2px; }
-    .log-entry { margin-bottom: 1px; }
-    .log-time  { color: #444; }
-    .log-agent { color: #9755FF; }
-    .log-ok    { color: #4ade80; }
-    .log-err   { color: #e94560; }
-    .log-warn  { color: #f59e0b; }
-
-    /* ── ACTIONS ── */
-    .sidebar-footer {
-      padding: 10px 16px;
-      border-top: 1px solid rgba(151,85,255,0.1);
-    }
-    .action-row { display: flex; gap: 6px; }
-    .action-select {
-      flex: 1; min-width: 0; padding: 9px 28px 9px 10px; border-radius: 6px;
-      background: rgba(10,4,20,0.8); border: 1px solid rgba(151,85,255,0.2);
-      color: #c49aff; font-family: 'Inter', sans-serif; font-size: 11px;
-      outline: none; cursor: pointer; appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%239755FF' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 8px center;
-      text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
-    }
-    .action-select:focus { border-color: #9755FF; }
-    .action-select option { background: #110820; color: #c49aff; }
-    .btn-go {
-      padding: 9px 14px; border-radius: 6px; border: none;
-      background: #9755FF; color: #fff; flex-shrink: 0;
-      font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
-      cursor: pointer; transition: background 0.2s;
-    }
-    .btn-go:hover { background: #7a3de8; }
-    .btn-reset {
-      margin-top: 6px; width: 100%; padding: 6px;
-      border-radius: 6px; border: 1px solid rgba(151,85,255,0.1);
-      background: transparent; color: #555;
-      font-family: 'Inter', sans-serif; font-size: 10px;
-      cursor: pointer; transition: all 0.2s;
-    }
-    .btn-reset:hover { color: #9980cc; border-color: rgba(151,85,255,0.3); }
-  </style>
+  /* Modal */
+  .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:100;align-items:center;justify-content:center}
+  .modal-overlay.visible{display:flex}
+  .modal{background:#110820;border:1px solid rgba(151,85,255,.3);border-radius:12px;padding:28px;width:500px;max-width:90vw;max-height:80vh;overflow-y:auto;box-shadow:0 0 80px rgba(151,85,255,.1)}
+  .modal-header{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid rgba(151,85,255,.12)}
+  .modal-title{font-size:14px;font-weight:700;color:#f59e0b}
+  .modal-question{font-size:13px;color:#c49aff;line-height:1.6;margin-bottom:16px}
+  .modal-items{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+  .modal-item{background:rgba(10,4,20,.6);border:1px solid rgba(151,85,255,.12);border-radius:6px;padding:10px 12px;font-size:12px;color:#9980cc;line-height:1.5}
+  .modal-input{width:100%;min-height:60px;padding:12px;border-radius:8px;background:rgba(10,4,20,.8);border:1px solid rgba(151,85,255,.15);color:#fff;font-family:'Syne',sans-serif;font-size:12px;resize:vertical;outline:none;margin-bottom:16px}
+  .modal-input:focus{border-color:#9755FF}
+  .modal-input::placeholder{color:#444}
+  .modal-actions{display:flex;gap:10px}
+  .modal-btn{flex:1;padding:11px;border-radius:8px;border:none;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+  .modal-btn.approve{background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25)}
+  .modal-btn.approve:hover{background:rgba(74,222,128,.25)}
+  .modal-btn.adjust{background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.25)}
+  .modal-btn.adjust:hover{background:rgba(245,158,11,.25)}
+</style>
 </head>
 <body>
+<div class="scene" id="scene">
+  <!-- Background -->
+  <div class="layer" style="z-index:1"><img src="personagens/bgescritorio.png" alt=""></div>
 
-<div class="header">
-  <h1><img src="logo.png" alt="SalvaTech" style="height:28px;image-rendering:auto;vertical-align:middle;"></h1>
-  <div class="header-right">
-    <span><span class="conn-dot off" id="connDot"></span><span class="conn-label" id="connLabel">Offline</span></span>
-    <div class="status-pill" id="globalStatus">IDLE</div>
-  </div>
-</div>
+  <!-- Mesa central -->
+  <div id="mesa-central"><img src="personagens/mesacentral.png" alt=""></div>
 
-<div class="main">
-  <div class="office">
-    <div class="office-floor">
+  <!-- Characters -->
+  <div class="agent-char" id="char-boss"><img src="personagens/boss.png" alt=""></div>
+  <div class="agent-char" id="char-estrategista"><img src="personagens/estrategista.png" alt=""></div>
+  <div class="agent-char" id="char-designer"><img src="personagens/Designer.png" alt=""></div>
+  <div class="agent-char" id="char-copywriter"><img src="personagens/copywriter.png" alt=""></div>
+  <div class="agent-char" id="char-analista"><img src="personagens/analista.png" alt=""></div>
 
-      <!-- DECO -->
-      <img class="deco" src="free-office-pixel-art/plant.png"        style="width:32px;height:32px;left:8px;top:8px;" alt="">
-      <img class="deco" src="free-office-pixel-art/water-cooler.png"  style="width:28px;height:40px;right:8px;top:8px;" alt="">
-      <img class="deco" src="free-office-pixel-art/coffee-maker.png"  style="width:28px;height:36px;right:8px;bottom:40px;" alt="">
-      <img class="deco" src="free-office-pixel-art/plant.png"         style="width:32px;height:32px;left:8px;bottom:40px;" alt="">
-      <img class="deco" src="free-office-pixel-art/printer.png"       style="width:36px;height:36px;left:256px;bottom:8px;" alt="">
-      <img class="deco" src="free-office-pixel-art/Trash.png"         style="width:20px;height:20px;left:310px;bottom:12px;" alt="">
-      <img class="deco" src="free-office-pixel-art/cabinet.png"       style="width:36px;height:44px;left:256px;top:4px;" alt="">
+  <!-- Effects -->
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
 
-      <!-- ORQUESTRADOR (center top) -->
-      <div class="station" id="st-orquestrador" style="left:236px;top:16px;">
-        <div class="bubble" id="bub-orquestrador">...</div>
-        <img class="sprite-char" src="free-office-pixel-art/boss.png" alt="">
-        <img class="sprite-desk" src="free-office-pixel-art/stamping-table.png" alt="">
-        <div class="agent-label"><span class="icon">🚀</span>ORQUESTRADOR<span class="status-dot idle" id="dot-orquestrador"></span></div>
+  <!-- HUD -->
+  <div class="hud">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="logo-area">
+        <img src="logo.png" alt="SalvaTech">
       </div>
-
-      <!-- ESTRATEGISTA (left) -->
-      <div class="station" id="st-estrategista" style="left:60px;top:120px;">
-        <div class="bubble" id="bub-estrategista">...</div>
-        <img class="sprite-char" src="free-office-pixel-art/Julia_Drinking_Coffee.png" alt="" style="width:48px;height:48px;object-fit:cover;object-position:left;">
-        <img class="sprite-desk" src="free-office-pixel-art/desk-with-pc.png" alt="">
-        <div class="agent-label"><span class="icon">🧠</span>ESTRATEGISTA<span class="status-dot idle" id="dot-estrategista"></span></div>
-      </div>
-
-      <!-- COPYWRITER (right) -->
-      <div class="station" id="st-copywriter" style="left:400px;top:120px;">
-        <div class="bubble" id="bub-copywriter">...</div>
-        <img class="sprite-char" src="free-office-pixel-art/worker1.png" alt="">
-        <img class="sprite-desk" src="free-office-pixel-art/writing-table.png" alt="">
-        <div class="agent-label"><span class="icon">✍️</span>COPYWRITER<span class="status-dot idle" id="dot-copywriter"></span></div>
-      </div>
-
-      <!-- ILUSTRADOR (bottom-left) -->
-      <div class="station" id="st-ilustrador" style="left:60px;top:260px;">
-        <div class="bubble" id="bub-ilustrador">...</div>
-        <img class="sprite-char" src="free-office-pixel-art/worker2.png" alt="">
-        <img class="sprite-desk" src="free-office-pixel-art/desk-with-pc.png" alt="">
-        <div class="agent-label"><span class="icon">🐒</span>ILUSTRADOR<span class="status-dot idle" id="dot-ilustrador"></span></div>
-      </div>
-
-      <!-- DESIGNER (bottom-right) -->
-      <div class="station" id="st-designer" style="left:400px;top:260px;">
-        <div class="bubble" id="bub-designer">...</div>
-        <img class="sprite-char" src="free-office-pixel-art/worker4.png" alt="">
-        <img class="sprite-desk" src="free-office-pixel-art/desk-with-pc.png" alt="">
-        <div class="agent-label"><span class="icon">🎨</span>DESIGNER<span class="status-dot idle" id="dot-designer"></span></div>
-      </div>
-
-      <!-- PARTITIONS -->
-      <img class="deco" src="free-office-pixel-art/office-partitions-1.png" style="width:48px;height:60px;left:190px;top:130px;opacity:0.4;" alt="">
-      <img class="deco" src="free-office-pixel-art/office-partitions-2.png" style="width:48px;height:60px;left:340px;top:130px;opacity:0.4;" alt="">
-      <img class="deco" src="free-office-pixel-art/office-partitions-1.png" style="width:48px;height:60px;left:190px;top:270px;opacity:0.4;" alt="">
-      <img class="deco" src="free-office-pixel-art/office-partitions-2.png" style="width:48px;height:60px;left:340px;top:270px;opacity:0.4;" alt="">
-
-    </div>
-  </div>
-
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="sidebar-scroll">
-
-      <h2>📅 FASE 1 — MENSAL</h2>
-      <div class="pipeline">
-        <div class="step" id="step-1"><span class="step-num">01</span><span class="step-name">Pesquisa + 8 temas</span><span class="step-icon">🧠</span></div>
-        <div class="step" id="step-2"><span class="step-num">02</span><span class="step-name">Aprovação temas</span><span class="step-icon">✋</span></div>
-        <div class="step" id="step-3"><span class="step-num">03</span><span class="step-name">Copy (8 posts)</span><span class="step-icon">✍️</span></div>
-        <div class="step" id="step-4"><span class="step-num">04</span><span class="step-name">Aprovação copys</span><span class="step-icon">✋</span></div>
-      </div>
-
-      <h2>🎨 FASE 2 — SEMANAL</h2>
-      <div class="pipeline">
-        <div class="step" id="step-5"><span class="step-num">05</span><span class="step-name">Ilustrador (2 posts)</span><span class="step-icon">🐒</span></div>
-        <div class="step" id="step-6"><span class="step-num">06</span><span class="step-name">Designer (slides)</span><span class="step-icon">🎨</span></div>
-        <div class="step" id="step-7"><span class="step-num">07</span><span class="step-name">Renderizador (PNGs)</span><span class="step-icon">🖼️</span></div>
-      </div>
-
-      <div class="post-info">
-        <h3>Semana</h3>
-        <div class="value muted" id="postTema">Nenhum post em produção</div>
-      </div>
-      <div class="post-info">
-        <h3>Composição</h3>
-        <div class="value muted" id="postComp">—</div>
-      </div>
-
-      <h2>📜 LOG</h2>
-      <div class="log-box" id="logBox">
-        <div class="log-entry"><span class="log-time">--:--</span> Aguardando conexão...</div>
+      <div class="topbar-right">
+        <div class="pill"><span class="dot" id="connDot"></span><span id="connLabel">offline</span></div>
+        <div class="pill"><span class="dot dp"></span><span id="globalStatus">idle</span></div>
       </div>
     </div>
 
-    <div class="sidebar-footer">
+    <!-- Agent tags -->
+    <div class="tag" style="bottom:58%;left:32%" id="tag-orquestrador">
+      <div class="tag-inner">
+        <div class="tag-name"><span class="dot dg" id="dot-orquestrador"></span>Orquestrador</div>
+        <div class="tag-role">coordenação</div>
+        <div class="tag-status" id="status-orquestrador">idle</div>
+      </div>
+    </div>
+    <div class="tag" style="bottom:54%;left:3%" id="tag-estrategista">
+      <div class="tag-inner">
+        <div class="tag-name"><span class="dot dg" id="dot-estrategista"></span>Estrategista</div>
+        <div class="tag-role">pesquisa · temas</div>
+        <div class="tag-status" id="status-estrategista">idle</div>
+      </div>
+    </div>
+    <div class="tag" style="bottom:54%;left:44%" id="tag-designer">
+      <div class="tag-inner">
+        <div class="tag-name"><span class="dot dg" id="dot-designer"></span>Designer</div>
+        <div class="tag-role">slides · render</div>
+        <div class="tag-status" id="status-designer">idle</div>
+      </div>
+    </div>
+    <div class="tag" style="bottom:54%;right:23%" id="tag-copywriter">
+      <div class="tag-inner">
+        <div class="tag-name"><span class="dot dg" id="dot-copywriter"></span>Copywriter</div>
+        <div class="tag-role">copy · legendas</div>
+        <div class="tag-status" id="status-copywriter">idle</div>
+      </div>
+    </div>
+    <div class="tag" style="bottom:52%;right:3%" id="tag-ilustrador">
+      <div class="tag-inner">
+        <div class="tag-name"><span class="dot dg" id="dot-ilustrador"></span>Ilustrador</div>
+        <div class="tag-role">imagens · arte</div>
+        <div class="tag-status" id="status-ilustrador">idle</div>
+      </div>
+    </div>
+
+    <!-- Bubbles -->
+    <div class="bubble" id="bub-orquestrador" style="bottom:64%;left:32%"><div class="bubble-inner"><div class="bubble-author">Orquestrador</div><span id="bub-text-orquestrador">...</span></div></div>
+    <div class="bubble" id="bub-estrategista" style="bottom:60%;left:3%"><div class="bubble-inner"><div class="bubble-author">Estrategista</div><span id="bub-text-estrategista">...</span></div></div>
+    <div class="bubble" id="bub-designer" style="bottom:60%;left:44%"><div class="bubble-inner"><div class="bubble-author">Designer</div><span id="bub-text-designer">...</span></div></div>
+    <div class="bubble" id="bub-copywriter" style="bottom:60%;right:23%"><div class="bubble-inner"><div class="bubble-author">Copywriter</div><span id="bub-text-copywriter">...</span></div></div>
+    <div class="bubble" id="bub-ilustrador" style="bottom:58%;right:3%"><div class="bubble-inner"><div class="bubble-author">Ilustrador</div><span id="bub-text-ilustrador">...</span></div></div>
+
+    <!-- Side panel -->
+    <div class="sidepanel" id="sidepanel"></div>
+
+    <!-- Bottom bar -->
+    <div class="bottombar">
+      <div class="bottom-left">
+        <div class="log-mini" id="logMini">aguardando...</div>
+      </div>
       <div class="action-row">
         <select class="action-select" id="actionSelect">
           <optgroup label="Mensal">
             <option value="planejamento">Planejamento completo</option>
-            <option value="copys">Gerar copys (temas prontos)</option>
+            <option value="copys">Gerar copys</option>
           </optgroup>
           <optgroup label="Semanal">
-            <option value="artes">Artes da semana (2 posts)</option>
-            <option value="arte1">Arte do post 1</option>
-            <option value="arte2">Arte do post 2</option>
+            <option value="artes">Artes (2 posts)</option>
+            <option value="arte1">Arte post 1</option>
+            <option value="arte2">Arte post 2</option>
           </optgroup>
           <optgroup label="Teste">
-            <option value="teste">1 post completo (busca+copy+arte)</option>
+            <option value="teste">1 post completo</option>
           </optgroup>
         </select>
-        <button class="btn-go" onclick="runAction()">Executar</button>
+        <button class="btn-go" onclick="runAction()">▶</button>
       </div>
-      <button class="btn-reset" onclick="resetDashboard()">Reset</button>
     </div>
   </div>
 </div>
 
-<!-- CHECKPOINT MODAL -->
+<!-- Checkpoint Modal -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title" id="modalTitle">Checkpoint — Aprovação</span>
-    </div>
+    <div class="modal-header"><span class="modal-title" id="modalTitle">Checkpoint</span></div>
     <div class="modal-question" id="modalQuestion"></div>
     <div class="modal-items" id="modalItems"></div>
-    <textarea class="modal-input" id="modalInput" placeholder="Escreva sua sugestão de ajuste aqui... (deixe vazio pra aprovar direto)"></textarea>
+    <textarea class="modal-input" id="modalInput" placeholder="Sugestão de ajuste..."></textarea>
     <div class="modal-actions">
       <button class="modal-btn approve" onclick="respondCheckpoint(true)">Aprovar</button>
       <button class="modal-btn adjust" onclick="respondCheckpoint(false)">Pedir ajuste</button>
@@ -419,82 +223,21 @@
   </div>
 </div>
 
-<style>
-  .modal-overlay {
-    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(10,4,20,0.85); z-index: 100;
-    align-items: center; justify-content: center;
-  }
-  .modal-overlay.visible { display: flex; }
-  .modal {
-    background: #110820; border: 1px solid rgba(151,85,255,0.3);
-    border-radius: 12px; padding: 28px; width: 500px; max-width: 90vw;
-    max-height: 80vh; overflow-y: auto;
-    box-shadow: 0 0 80px rgba(151,85,255,0.1);
-  }
-  .modal::-webkit-scrollbar { width: 4px; }
-  .modal::-webkit-scrollbar-thumb { background: rgba(151,85,255,0.3); border-radius: 2px; }
-  .modal-header {
-    display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
-    padding-bottom: 14px; border-bottom: 1px solid rgba(151,85,255,0.12);
-  }
-  .modal-title {
-    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700;
-    color: #f59e0b; letter-spacing: 0.5px;
-  }
-  .modal-question {
-    font-family: 'Inter', sans-serif;
-    font-size: 13px; color: #c49aff; line-height: 1.6; margin-bottom: 16px;
-  }
-  .modal-items {
-    display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;
-  }
-  .modal-item {
-    background: rgba(10,4,20,0.6); border: 1px solid rgba(151,85,255,0.12);
-    border-radius: 6px; padding: 10px 12px;
-    font-family: 'Inter', sans-serif; font-size: 12px; color: #9980cc; line-height: 1.5;
-  }
-  .modal-item strong { color: #fff; }
-  .modal-input {
-    width: 100%; min-height: 60px; padding: 12px; border-radius: 8px;
-    background: rgba(10,4,20,0.8); border: 1px solid rgba(151,85,255,0.15);
-    color: #fff; font-family: 'Inter', sans-serif; font-size: 12px;
-    resize: vertical; outline: none; margin-bottom: 16px;
-  }
-  .modal-input:focus { border-color: #9755FF; }
-  .modal-input::placeholder { color: #444; }
-  .modal-actions { display: flex; gap: 10px; }
-  .modal-btn {
-    flex: 1; padding: 11px; border-radius: 8px; border: none;
-    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
-    cursor: pointer; transition: all 0.2s;
-  }
-  .modal-btn.approve {
-    background: rgba(74,222,128,0.12); color: #4ade80;
-    border: 1px solid rgba(74,222,128,0.25);
-  }
-  .modal-btn.approve:hover { background: rgba(74,222,128,0.25); }
-  .modal-btn.adjust {
-    background: rgba(245,158,11,0.12); color: #f59e0b;
-    border: 1px solid rgba(245,158,11,0.25);
-  }
-  .modal-btn.adjust:hover { background: rgba(245,158,11,0.25); }
-</style>
-
 <script>
+const AGENTS = ['orquestrador','estrategista','copywriter','ilustrador','designer'];
+const STATUS_CLASSES = {idle:'dg',working:'dp',done:'dg',waiting:'da',error:'dr'};
 let ws = null;
 
 function connect() {
   const host = window.location.host || 'localhost:3737';
   ws = new WebSocket(`ws://${host}`);
   ws.onopen = () => {
-    document.getElementById('connDot').className = 'conn-dot on';
-    document.getElementById('connLabel').textContent = 'Conectado';
-    addLogEntry('--:--', 'Conectado ao servidor', 'ok');
+    document.getElementById('connDot').className = 'dot dg';
+    document.getElementById('connLabel').textContent = 'online';
   };
   ws.onclose = () => {
-    document.getElementById('connDot').className = 'conn-dot off';
-    document.getElementById('connLabel').textContent = 'Offline';
+    document.getElementById('connDot').className = 'dot dr';
+    document.getElementById('connLabel').textContent = 'offline';
     setTimeout(connect, 3000);
   };
   ws.onerror = () => ws.close();
@@ -506,64 +249,69 @@ function connect() {
 }
 
 function applyState(s) {
-  const labels = { idle:'IDLE', running:'EM PRODUÇÃO', checkpoint:'CHECKPOINT', done:'CONCLUÍDO', error:'ERRO' };
+  const labels = {idle:'idle',running:'running',checkpoint:'checkpoint',done:'done',error:'error'};
   document.getElementById('globalStatus').textContent = labels[s.pipeline] || s.pipeline;
 
-  const temaEl = document.getElementById('postTema');
-  const compEl = document.getElementById('postComp');
-  temaEl.textContent = s.tema || 'Nenhum post em produção';
-  temaEl.classList.toggle('muted', !s.tema);
-  compEl.textContent = s.composicao || '—';
-  compEl.classList.toggle('muted', !s.composicao);
-
-  Object.keys(s.agents).forEach(name => {
+  // Agents
+  AGENTS.forEach(name => {
     const a = s.agents[name];
+    if (!a) return;
     const dot = document.getElementById('dot-' + name);
+    const st = document.getElementById('status-' + name);
     const bub = document.getElementById('bub-' + name);
-    const st  = document.getElementById('st-' + name);
-    if (dot) dot.className = 'status-dot ' + (a.status || 'idle');
-    if (bub) bub.textContent = a.message || '...';
-    if (st) {
-      st.classList.toggle('active', a.status === 'working');
-      st.classList.toggle('waiting', a.status === 'waiting');
+    const bubText = document.getElementById('bub-text-' + name);
+    const charEl = document.getElementById('char-' + (name === 'ilustrador' ? 'analista' : name));
+
+    if (dot) dot.className = 'dot ' + (STATUS_CLASSES[a.status] || 'dg');
+    if (st) st.textContent = a.message || a.status || 'idle';
+    if (bubText) bubText.textContent = a.message || '...';
+
+    // Show bubble when working/waiting
+    if (bub) {
+      if (a.status === 'working' || a.status === 'waiting') bub.classList.add('show');
+      else bub.classList.remove('show');
+    }
+    // Bounce when working
+    if (charEl) {
+      if (a.status === 'working') charEl.classList.add('working');
+      else charEl.classList.remove('working');
     }
   });
 
+  // Build side panel
+  const panel = document.getElementById('sidepanel');
+  let html = '';
   Object.keys(s.steps).forEach(num => {
-    const el = document.getElementById('step-' + num);
-    if (!el) return;
-    el.className = 'step';
     const st = s.steps[num];
-    if (st === 'active' || st === 'working') el.classList.add('active');
-    else if (st === 'done') el.classList.add('done');
-    else if (st === 'waiting') el.classList.add('waiting');
+    const names = {1:'Pesquisa',2:'Aprovação',3:'Copy',4:'Aprovação',5:'Ilustrador',6:'Designer',7:'Render'};
+    const active = st === 'active' || st === 'working' ? ' active' : '';
+    const fill = st === 'done' ? 100 : st === 'active' ? 50 : 0;
+    const color = st === 'done' ? '#22d687' : '#9755FF';
+    html += `<div class="acard${active}"><div class="acard-name">${num}. ${names[num]||'Step'}</div><div class="acard-task">${st}</div><div class="acard-bar"><div class="acard-fill" style="width:${fill}%;background:${color}"></div></div></div>`;
   });
+  panel.innerHTML = html;
 
+  // Log
   if (s.log && s.log.length) {
-    const box = document.getElementById('logBox');
-    box.innerHTML = s.log.map(l =>
-      `<div class="log-entry"><span class="log-time">${l.time}</span> <span class="log-${l.type||''}">${l.msg}</span></div>`
-    ).join('');
-    box.scrollTop = box.scrollHeight;
+    const last = s.log[s.log.length - 1];
+    document.getElementById('logMini').textContent = `${last.time} ${last.msg}`;
   }
 
-  // Show checkpoint modal if pending
-  if (s.checkpoint && !s.checkpoint.responded) {
-    showCheckpoint(s.checkpoint);
-  }
+  // Checkpoint
+  if (s.checkpoint && !s.checkpoint.responded) showCheckpoint(s.checkpoint);
 }
 
 function showCheckpoint(cp) {
   if (!cp) return;
   document.getElementById('modalQuestion').textContent = cp.question;
-  const itemsEl = document.getElementById('modalItems');
-  itemsEl.innerHTML = '';
+  const items = document.getElementById('modalItems');
+  items.innerHTML = '';
   if (cp.items && cp.items.length) {
-    cp.items.forEach((item, i) => {
-      const div = document.createElement('div');
-      div.className = 'modal-item';
-      div.innerHTML = typeof item === 'string' ? item : `<strong>${i+1}.</strong> ${item.tema || item.text || JSON.stringify(item)}`;
-      itemsEl.appendChild(div);
+    cp.items.forEach(item => {
+      const d = document.createElement('div');
+      d.className = 'modal-item';
+      d.textContent = typeof item === 'string' ? item : JSON.stringify(item);
+      items.appendChild(d);
     });
   }
   document.getElementById('modalInput').value = '';
@@ -572,36 +320,16 @@ function showCheckpoint(cp) {
 
 function respondCheckpoint(approved) {
   const feedback = document.getElementById('modalInput').value.trim();
-  if (!approved && !feedback) {
-    document.getElementById('modalInput').focus();
-    document.getElementById('modalInput').style.borderColor = '#e94560';
-    return;
-  }
+  if (!approved && !feedback) { document.getElementById('modalInput').focus(); return; }
   fetch('/api/checkpoint/respond', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: 'POST', headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ approved, feedback })
-  }).then(() => {
-    document.getElementById('modalOverlay').classList.remove('visible');
-    document.getElementById('modalInput').style.borderColor = '';
-  }).catch(() => {});
+  }).then(() => document.getElementById('modalOverlay').classList.remove('visible'));
 }
-
-function addLogEntry(time, msg, type) {
-  const box = document.getElementById('logBox');
-  box.innerHTML += `<div class="log-entry"><span class="log-time">${time}</span> <span class="log-${type||''}">${msg}</span></div>`;
-  box.scrollTop = box.scrollHeight;
-}
-
-function resetDashboard() { fetch('/api/reset', { method: 'POST' }).catch(() => {}); }
 
 function runAction() {
   const cmd = document.getElementById('actionSelect').value;
-  fetch('/api/command', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ command: cmd })
-  }).catch(() => {});
+  fetch('/api/command', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({command:cmd}) });
 }
 
 connect();
