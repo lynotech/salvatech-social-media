@@ -2,70 +2,85 @@
 agent: ilustrador
 execution: inline
 inputFile: posts/{slug}/brief.md
-outputFile: posts/{slug}/assets/capa.jpg
+outputFile: posts/{slug}/assets/mascote.png
 model_tier: standard
 skills:
   - image-ai-generator
-  - image-creator
 ---
 
-# Geração de Imagens do Carrossel
+# Geração de Imagens — Carrossel Panorâmico
 
-Com base no tema, referência visual do brief e copy aprovados, gere as imagens do carrossel.
+O carrossel da SalvaTech usa composição em camadas: mascote separado + cenário panorâmico largo. As duas imagens são compostas e fatiadas em slides pelo script `compose-panorama.py`.
 
 ## O que gerar
 
-### 1. Capa (capa.jpg)
+### 1. Mascote (`mascote.png`)
 
-Leia o campo `COMPOSIÇÃO DE CAPA` do brief (A, B, C ou D) e construa o prompt adequado.
-
-Construa o prompt do zero seguindo o sistema de camadas do seu agent:
-
-- **Camada 1 — Enquadramento:** escolha o mais adequado ao tema (close-up, costas, corpo inteiro, três-quartos, lateral)
-- **Camada 2 — Ação/postura:** conecte ao tema do carrossel
-- **Camada 3 — Ambiente/cenário:** espacial ou tech, sempre relacionado ao tema
-- **Camada 4 — Iluminação:** cold blue-white como padrão, ajuste conforme a emoção
-- **Camada 5 — Elemento de destaque:** opcional, use se agregar ao tema
-- **Camada 6 — Expressão:** só se rosto visível
-
-DNA fixo obrigatório: chimpanzé, traje branco NASA-style (sem logo NASA visível — traje liso branco), fotorrealista, Hasselblad 8K, sem texto na imagem.
-
-**Instrução de composição obrigatória no final de todo prompt de capa:**
-Use a instrução correspondente à composição definida no brief (A, B, C ou D).
-Consulte o Mapa de Zonas no seu agent para copiar a instrução correta.
-
-Consulte `_memory/runs.md` para não repetir o mesmo enquadramento do carrossel anterior.
-
-### 2. Background (background.jpg)
-Fundo abstrato dark para os slides internos — deve suportar texto branco sobreposto sem competir.
-
-## Execução
+Construa o prompt seguindo o agent `agents/ilustrador.agent.md`:
+- Fundo escuro sólido (near black), SEM cenário complexo
+- Corpo visível (full body ou three-quarter)
+- Traje branco liso, sem logos
+- Iluminação dramática direcional
 
 ```bash
-python3 skills/image-ai-generator/scripts/generate.py \
-  --prompt "{prompt da capa construído}" \
-  --output "posts/{slug}/assets/capa.jpg" \
-  --width 1080 \
-  --height 1350 \
+python skills/image-ai-generator/scripts/generate.py \
+  --prompt "{PROMPT_MASCOTE}" \
+  --output "posts/{slug}/assets/mascote.png" \
   --mode test
 ```
 
+### 2. Cenário panorâmico (`panorama-bg.jpg`)
+
+Imagem ultra-wide SEM personagem, conectada ao tema:
+
 ```bash
-python3 skills/image-ai-generator/scripts/generate.py \
-  --prompt "Abstract deep space dark background. Base color deep black #0a0414. Faint violet (#9755FF) glowing circuit-like geometric lines and soft nebula clouds scattered subtly across the frame. Low contrast, very dark — designed to sit behind white text overlay without competing. No characters, no objects, no text. Vertical portrait format 1080x1350px. Photorealistic space atmosphere, cinematic color grade." \
-  --output "posts/{slug}/assets/background.jpg" \
-  --width 1080 \
-  --height 1350 \
+python skills/image-ai-generator/scripts/generate.py \
+  --prompt "Ultra-wide panoramic scene, {DESCRICAO_AMBIENTE}. {ILUMINACAO}. No characters, no people, no animals — environment only. The scene extends horizontally with visual interest distributed across the entire width. Base color very dark near black, with violet and cold blue accent lighting. Photorealistic, cinematic, 8K. No text. Ultra-wide panoramic format." \
+  --output "posts/{slug}/assets/panorama-bg.jpg" \
   --mode test
+```
+
+### 3. Composição + fatiamento
+
+Após gerar as 2 imagens, componha e fatie:
+
+```bash
+python pipeline/compose-panorama.py \
+  --background "posts/{slug}/assets/panorama-bg.jpg" \
+  --character "posts/{slug}/assets/mascote.png" \
+  --output-dir "posts/{slug}/assets/slices" \
+  --slides 7 \
+  --char-position 0 \
+  --char-scale 0.85
+```
+
+Opções de `--char-position` (em qual slide o mascote aparece):
+- `0` = slide 1 (capa) — padrão
+- `3` = slide 4 (centro do carrossel)
+- `6` = slide 7 (último slide)
+
+## Output esperado
+
+```
+posts/{slug}/assets/
+├── mascote.png          ← mascote com fundo escuro
+├── panorama-bg.jpg      ← cenário panorâmico ultra-wide
+├── panorama-full.jpg    ← composição completa (mascote + cenário)
+└── slices/
+    ├── slice-01.jpg     ← fatia do slide 1 (com mascote se char-position=0)
+    ├── slice-02.jpg
+    ├── slice-03.jpg
+    ├── slice-04.jpg
+    ├── slice-05.jpg
+    ├── slice-06.jpg
+    └── slice-07.jpg
 ```
 
 ## Veto Conditions
 
-- Imagem contém texto renderizado → regerar
-- Imagem tem fundo claro/branco → regerar
-- Rosto do mascote está no terço superior da imagem (acima de 35% da altura) → regerar
-- Personagem não está na metade inferior do frame → regerar
-- Imagem tem bordas pretas ou moldura (não é edge-to-edge) → regerar
-- Bordas laterais não são escuras o suficiente pra integrar com #0a0414 → regerar
-- Arquivo vazio ou não gerado → regerar
-- Mesmo enquadramento do carrossel anterior → regerar com composição diferente
+- Mascote tem cenário complexo atrás (não é fundo escuro sólido) → regerar
+- Mascote tem logos no traje → regerar
+- Cenário panorâmico tem personagem/pessoa/animal → regerar
+- Cenário não é wide o suficiente (precisa ser pelo menos 5x mais largo que alto) → regerar
+- Iluminação do mascote e cenário são inconsistentes → regerar um deles
+- Slices não foram geradas → rodar compose-panorama.py

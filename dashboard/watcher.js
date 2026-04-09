@@ -52,17 +52,19 @@ EXECUTE TUDO SEM PERGUNTAR. Comece agora.`,
 
 PASSO 1 — Identifique os 2 posts da semana atual em posts/ que ja tem brief.md e copy.md
 
-PASSO 2 — Para cada post, execute o Ilustrador:
+PASSO 2 — Para cada post, execute o Ilustrador (carrossel panoramico):
 node dashboard/notify.js '{"pipeline":"running","step":5,"stepStatus":"active","agent":"ilustrador","status":"working","message":"Gerando arte...","log":"Ilustrador iniciou","logType":"agent"}'
 - Leia pipeline/steps/05-ilustrador.md e agents/ilustrador.agent.md
-- Construa o prompt seguindo as camadas e o mapa de zonas da composicao definida no brief
-- Gere capa.jpg: python skills/image-ai-generator/scripts/generate.py --prompt "..." --output "posts/{slug}/assets/capa.jpg" --mode test
-- Gere background.jpg (OBRIGATORIO): python skills/image-ai-generator/scripts/generate.py --prompt "Abstract deep space dark background. Base color deep black #0a0414. Faint violet #9755FF glowing circuit-like geometric lines and soft nebula clouds. Low contrast, very dark. No characters, no objects, no text. Vertical portrait 1080x1350px. Photorealistic, cinematic color grade." --output "posts/{slug}/assets/background.jpg" --mode test
-- SEM o background.jpg os slides internos ficam sem fundo. Sempre gere os 2.
+- Gere o MASCOTE (fundo escuro solido, sem cenario):
+  python skills/image-ai-generator/scripts/generate.py --prompt "PROMPT_MASCOTE_AQUI" --output "posts/{slug}/assets/mascote.png" --mode test
+- Gere o CENARIO PANORAMICO (ultra-wide, sem personagem):
+  python skills/image-ai-generator/scripts/generate.py --prompt "PROMPT_CENARIO_AQUI" --output "posts/{slug}/assets/panorama-bg.jpg" --mode test
+- COMPONHA e FATIE:
+  python pipeline/compose-panorama.py --background "posts/{slug}/assets/panorama-bg.jpg" --character "posts/{slug}/assets/mascote.png" --output-dir "posts/{slug}/assets/slices" --slides 7 --char-position 0 --char-scale 0.85
 
-PASSO 3 — Monte os slides:
+PASSO 3 — Monte os slides HTML:
 node dashboard/notify.js '{"step":6,"stepStatus":"active","agent":"designer","status":"working","message":"Montando slides...","log":"Designer iniciou","logType":"agent"}'
-node pipeline/build-slides.js --slug {SLUG} --composicao {TIPO}
+node pipeline/build-slides.js --slug {SLUG}
 
 PASSO 4 — Renderize os PNGs:
 node dashboard/notify.js '{"step":7,"stepStatus":"active","agent":"designer","status":"working","message":"Renderizando PNGs...","log":"Renderizador iniciou","logType":"agent"}'

@@ -65,13 +65,15 @@ console.log(`\n  🎨 Build Slides — ${slug}`);
 console.log(`  Composição: Tipo ${composicao} | Interno: ${interno}`);
 console.log(`  Slides encontrados no copy: ${slides.length}\n`);
 
-// ── Paths ──
-const capaPath = `../assets/capa.jpg`;
-const bgPath = `../assets/background.jpg`;
+// ── Paths — agora usa slices panorâmicas ──
+// Cada slide usa sua fatia correspondente como background
+function slicePath(num) {
+  return `../assets/slices/slice-${String(num).padStart(2, '0')}.jpg`;
+}
 
 // ── Build slide 01 (capa) ──
 const capaTemplate = fs.readFileSync(
-  path.join(TMPL_DIR, `capa-${composicao.toLowerCase()}.html`), 'utf-8'
+  path.join(TMPL_DIR, `capa-a.html`), 'utf-8'  // panorâmico sempre usa template A (imagem full-bleed)
 );
 
 const slide01 = slides.find(s => s.num === 1);
@@ -81,10 +83,10 @@ if (slide01) {
     .replace('{{ZONA_HEADLINE_L1}}', slide01.zones.ZONA_HEADLINE_L1 || '')
     .replace('{{ZONA_HEADLINE_L2}}', slide01.zones.ZONA_HEADLINE_L2 || '')
     .replace('{{ZONA_SUB}}', slide01.zones.ZONA_SUB || '')
-    .replace('{{CAPA_JPG_PATH}}', capaPath);
+    .replace('{{CAPA_JPG_PATH}}', slicePath(1));
   
   fs.writeFileSync(path.join(SLIDES_DIR, 'slide-01.html'), html);
-  console.log('  ✓ slide-01.html (capa)');
+  console.log('  ✓ slide-01.html (capa — slice 01)');
 }
 
 // ── Build slides 02-06 (internos) ──
@@ -102,12 +104,12 @@ internoSlides.forEach((slide, idx) => {
     .replace('{{ZONA_LABEL}}', slide.zones.ZONA_LABEL || '')
     .replace('{{ZONA_HEADLINE}}', slide.zones.ZONA_HEADLINE || '')
     .replace('{{ZONA_BODY}}', slide.zones.ZONA_BODY || '')
-    .replace('{{BG_JPG_PATH}}', bgPath)
+    .replace('{{BG_JPG_PATH}}', slicePath(slide.num))
     .replace('{{SLIDE_NUM}}', numPad)
     .replace('{{SLIDE_NUM_DISPLAY}}', `${numPad} / 07`);
 
   fs.writeFileSync(path.join(SLIDES_DIR, `slide-${numPad}.html`), html);
-  console.log(`  ✓ slide-${numPad}.html (${tmplName.replace('.html','')})`);
+  console.log(`  ✓ slide-${numPad}.html (${tmplName.replace('.html','')}) — slice ${numPad}`);
 });
 
 // ── Build slide 07 (CTA) ──
@@ -119,7 +121,7 @@ if (ctaSlide) {
     .replace('{{ZONA_HEADLINE_L2}}', ctaSlide.zones.ZONA_HEADLINE_L2 || '')
     .replace('{{ZONA_BODY}}', ctaSlide.zones.ZONA_BODY || '')
     .replace('{{ZONA_CTA}}', ctaSlide.zones.ZONA_CTA || '')
-    .replace('{{BG_JPG_PATH}}', bgPath);
+    .replace('{{BG_JPG_PATH}}', slicePath(7));
 
   fs.writeFileSync(path.join(SLIDES_DIR, 'slide-07.html'), html);
   console.log('  ✓ slide-07.html (cta)');

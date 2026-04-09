@@ -1,10 +1,12 @@
 ---
 name: Designer
 icon: 🎨
-version: 3.0.0
-description: Monta slides HTML/CSS com copy + imagens, respeitando o sistema de zonas compartilhado com o Ilustrador
+version: 4.0.0
+description: Monta slides HTML/CSS de alto padrão visual usando templates panorâmicos e slices
 skills:
   - template-designer
+  - frontend-design
+  - web-design-guidelines
   - canva
 ---
 

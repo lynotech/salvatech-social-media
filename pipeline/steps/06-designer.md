@@ -2,48 +2,51 @@
 agent: designer
 execution: inline
 model_tier: fast
+skills:
+  - frontend-design
+  - web-design-guidelines
 ---
 
-# Geração dos Slides HTML
+# Geração dos Slides HTML — Carrossel Panorâmico
 
-Este step usa templates prontos. NÃO gere HTML manualmente — rode o script.
+Este step usa templates prontos com slices panorâmicas. Rode o script.
 
 ## Processo
 
 1. Leia o campo `COMPOSIÇÃO DE CAPA` do brief (`posts/{slug}/brief.md`)
-2. Rode o script de build:
+2. Confirme que as slices existem em `posts/{slug}/assets/slices/`
+3. Rode o script de build:
 
 ```bash
-node pipeline/build-slides.js --slug {SLUG} --composicao {A|B|C|D}
+node pipeline/build-slides.js --slug {SLUG}
 ```
 
-Exemplo:
-```bash
-node pipeline/build-slides.js --slug 2026-04-08-ia-acelera-desenvolvimento --composicao A
-```
+4. Verifique os HTMLs gerados em `posts/{slug}/slides/`
 
-3. Verifique os HTMLs gerados em `posts/{slug}/slides/`
-4. Se algum slide precisar de ajuste fino (texto longo demais, etc.), edite o HTML diretamente
+## Inputs necessários
 
-## Inputs necessários antes de rodar
+- `posts/{slug}/copy.md` — copy estruturado por zonas
+- `posts/{slug}/assets/slices/slice-01.jpg` até `slice-07.jpg` — fatias panorâmicas
 
-- `posts/{slug}/copy.md` — copy estruturado por zonas (output do Copywriter)
-- `posts/{slug}/assets/capa.jpg` — imagem da capa (output do Ilustrador)
-- `posts/{slug}/assets/background.jpg` — fundo dos slides internos (output do Ilustrador)
+## Design System
 
-## Templates disponíveis
+Os templates seguem as guidelines de `skills/frontend-design/SKILL.md`:
+- Tipografia: Syne 800 (headlines), Outfit 300-600 (body/labels)
+- Noise texture sutil pra profundidade
+- Backdrop-filter blur no rodapé e cards
+- Gradient overlays pra legibilidade do texto sobre as slices
+- Box-shadow com múltiplas camadas nos cards
+- Label com borda lateral roxa como âncora visual
 
-Os templates ficam em `pipeline/templates/`:
-- `capa-a.html` — Objeto Dominante (mascote embaixo)
-- `capa-b.html` — Texto em Bloco Total (imagem como fundo)
-- `capa-c.html` — Objeto Central (mascote no centro)
-- `capa-d.html` — Split Lateral (imagem à direita)
-- `slide-i1.html` — Slide interno com número decorativo
-- `slide-i2.html` — Slide interno com card centralizado
-- `slide-cta.html` — Slide final com CTA
+## Templates
+
+- `capa-a.html` — Slide 1 com headline + slice panorâmica (mascote visível)
+- `slide-i1.html` — Interno com número decorativo grande
+- `slide-i2.html` — Interno com card glassmorphism
+- `slide-cta.html` — CTA com glow orb e botão gradiente
 
 ## Veto Conditions
 
 - Menos de 7 HTMLs gerados → verificar copy.md e rodar novamente
-- Texto cortado ou overflow → ajustar font-size no HTML específico
-- Imagem não carrega → verificar paths relativos dos assets
+- Texto cortado ou overflow → ajustar font-size no HTML
+- Slices não encontradas → rodar compose-panorama.py primeiro

@@ -106,7 +106,7 @@ posts/2026-04-16-checklist-mvp-antes-de-lancar/
 | 🧠 Estrategista | Pesquisa tendências, define tema, entrega brief | apify |
 | ✍️ Copywriter | Copy estruturado por zonas visuais | — |
 | 🐒 Ilustrador | Gera capa.jpg + background.jpg | image-ai-generator, image-creator |
-| 🎨 Designer | Monta slides HTML + exporta PNG | template-designer, canva, image-creator |
+| 🎨 Designer | Monta slides HTML + exporta PNG | template-designer, frontend-design, web-design-guidelines, canva, image-creator |
 
 ---
 
