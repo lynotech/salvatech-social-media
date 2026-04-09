@@ -23,7 +23,7 @@ Slide 04 (CTA)   → Ação — o que fazer agora
 
 - Máximo 15 palavras por slide
 - ZONA_SUB da capa: máx 8 palavras
-- ZONA_BODY: máx 12 palavras, ou omitir se headline basta
+- ZONA_BODY dos internos: 2–3 frases, máx 30 palavras. Desenvolva o ponto.
 - NÃO usar travessão (—)
 
 ## Formato — copy.md

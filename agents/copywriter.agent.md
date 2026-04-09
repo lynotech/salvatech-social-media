@@ -49,7 +49,7 @@ ZONA_SUB     → 1 linha, máx 8 palavras. Provoca o swipe.
 ```
 ZONA_LABEL   → 01
 ZONA_HEADLINE → 4–6 palavras, apresenta a dor
-ZONA_BODY    → 1 frase, máx 12 palavras (ou omitir)
+ZONA_BODY    → 2–3 frases, máx 30 palavras. Desenvolva o ponto com dado, exemplo ou consequência real.
 ```
 
 ### Slide 03 — SOLUÇÃO
@@ -57,7 +57,7 @@ ZONA_BODY    → 1 frase, máx 12 palavras (ou omitir)
 ```
 ZONA_LABEL   → 02
 ZONA_HEADLINE → 4–6 palavras, mostra o caminho
-ZONA_BODY    → 1 frase, máx 12 palavras (ou omitir)
+ZONA_BODY    → 2–3 frases, máx 30 palavras. Explique como resolver, com exemplo prático.
 ```
 
 ### Slide 04 — CTA

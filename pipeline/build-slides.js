@@ -61,8 +61,7 @@ slides.filter(s => s.num >= 2 && s.num <= 3).forEach((s, i) => {
     .replace('{{ZONA_HEADLINE}}', s.z.ZONA_HEADLINE || '')
     .replace('{{ZONA_BODY}}', s.z.ZONA_BODY || '')
     .replace('{{BG_JPG_PATH}}', bgPath)
-    .replace('{{SLIDE_NUM}}', n)
-    .replace('{{SLIDE_NUM_DISPLAY}}', `${n} / 04`);
+    .replace('{{SLIDE_NUM}}', n);
   fs.writeFileSync(path.join(OUT, `slide-${n}.html`), h);
   console.log(`  ✓ slide-${n}.html`);
 });
