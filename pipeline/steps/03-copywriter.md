@@ -6,87 +6,61 @@ outputFile: posts/{slug}/copy.md
 model_tier: powerful
 ---
 
-# Copy Mensal — Carrossel Panorâmico
+# Copy Mensal — 4 Slides Panorâmicos
 
-Com base nos briefs aprovados, escreva o copy dos 7 slides de cada post + legendas.
+Gere o copy de cada post com 4 slides + legendas.
 
-## Contexto do formato
+## Formato: 4 slides
 
-O carrossel da SalvaTech é panorâmico contínuo — a imagem de fundo flui entre os slides. O copy precisa ser mais enxuto que um carrossel tradicional porque a imagem carrega peso visual. Menos texto = mais impacto.
-
-## Processo
-
-1. Leia o planejamento mensal em `posts/planejamento-{MES}.md`
-2. Para cada post (8 no total), leia o brief em `posts/{slug}/brief.md`
-3. Gere o copy seguindo o arco narrativo: gancho → tensão → virada → ação
-4. Salve em `posts/{slug}/copy.md`
-5. Gere as legendas (Instagram, LinkedIn, TikTok)
-6. Salve em `posts/{slug}/legenda.md`
+```
+Slide 01 (CAPA)  → Gancho — para o scroll
+Slide 02         → Problema — apresenta a dor
+Slide 03         → Solução — mostra o caminho
+Slide 04 (CTA)   → Ação — o que fazer agora
+```
 
 ## Regras
 
-- Máximo 20 palavras por slide (panorâmico pede menos texto)
+- Máximo 15 palavras por slide
 - ZONA_SUB da capa: máx 8 palavras
-- ZONA_BODY dos internos: máx 15 palavras, ou OMITIR se headline basta
+- ZONA_BODY: máx 12 palavras, ou omitir se headline basta
 - NÃO usar travessão (—)
-- Linguagem direta, tom de dev sênior explicando pro CEO
 
-## Formato de saída — copy.md
+## Formato — copy.md
 
 ```
 [SLIDE 01 — CAPA]
-ZONA_LABEL:              [2–3 palavras em caps]
-ZONA_HEADLINE_L1 (branco): [impacto]
-ZONA_HEADLINE_L2 (roxo):   [complemento]
-ZONA_SUB:                [máx 8 palavras, provocação]
+ZONA_LABEL:              [2–3 palavras caps]
+ZONA_HEADLINE_L1 (branco): [3–5 palavras]
+ZONA_HEADLINE_L2 (roxo):   [2–4 palavras]
+ZONA_SUB:                [máx 8 palavras]
 
 [SLIDE 02]
 ZONA_LABEL:    01
-ZONA_HEADLINE: [4–7 palavras]
-ZONA_BODY:     [1 frase, máx 15 palavras — ou omitir]
+ZONA_HEADLINE: [4–6 palavras]
+ZONA_BODY:     [máx 12 palavras ou omitir]
 
 [SLIDE 03]
 ZONA_LABEL:    02
-ZONA_HEADLINE: ...
-ZONA_BODY:     ...
+ZONA_HEADLINE: [4–6 palavras]
+ZONA_BODY:     [máx 12 palavras ou omitir]
 
-[SLIDE 04]
-ZONA_LABEL:    03
-ZONA_HEADLINE: ...
-ZONA_BODY:     ...
-
-[SLIDE 05]
-ZONA_LABEL:    04
-ZONA_HEADLINE: ...
-ZONA_BODY:     ...
-
-[SLIDE 06]
-ZONA_LABEL:    05
-ZONA_HEADLINE: ...
-ZONA_BODY:     ...
-
-[SLIDE 07 — CTA]
+[SLIDE 04 — CTA]
 ZONA_HEADLINE_L1 (branco):  ...
 ZONA_HEADLINE_L2 (roxo):    ...
-ZONA_BODY:     [benefício imediato]
+ZONA_BODY:     [benefício]
 ZONA_CTA:      [ação curta]
 ```
 
-## Formato de saída — legenda.md
+## Formato — legenda.md
 
 ```
 [LEGENDA — INSTAGRAM]
-[gancho na primeira linha]
-[texto complementar]
-[CTA]
-[hashtags]
+[gancho + texto + CTA + hashtags]
 
 [LEGENDA — LINKEDIN]
-[tom profissional]
-[contexto]
-[pergunta final]
+[tom profissional + pergunta final]
 
 [LEGENDA — TIKTOK]
-[máx 300 chars]
-[hashtags]
+[máx 300 chars + hashtags]
 ```

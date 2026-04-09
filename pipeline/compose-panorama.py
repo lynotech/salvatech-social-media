@@ -118,7 +118,7 @@ def main():
     parser.add_argument('--background', required=True, help='Panoramic background image')
     parser.add_argument('--character', required=True, help='Character PNG with transparency')
     parser.add_argument('--output-dir', required=True, help='Output directory for slices')
-    parser.add_argument('--slides', type=int, default=7, help='Number of slides')
+    parser.add_argument('--slides', type=int, default=4, help='Number of slides')
     parser.add_argument('--char-position', type=int, default=0, help='Slide index for character (0-indexed)')
     parser.add_argument('--char-scale', type=float, default=0.85, help='Character height as fraction of slide')
     parser.add_argument('--char-offset-x', type=int, default=0, help='Horizontal offset from center')

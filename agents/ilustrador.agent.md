@@ -65,7 +65,7 @@ The background is solid dark, near black, with minimal environment — just the 
 O cenário é uma imagem ultra-larga SEM personagem. É o "mundo" por trás do mascote que se estende por todos os slides.
 
 ```
-Formato:     Ultra-wide panoramic, 7560x1350px (7 slides) ou 5400x1350px (5 slides)
+Formato:     Ultra-wide panoramic, 4320x1350px (4 slides)
 Conteúdo:    Cenário espacial/tech conectado ao tema, SEM personagem
 Cores:       Base escura (#0a0414), acentos em roxo (#9755FF), azul frio
 Requisito:   Deve funcionar como fundo contínuo quando fatiado em slides
@@ -80,7 +80,7 @@ The scene extends horizontally with visual interest distributed across the entir
 Base color very dark near black (#0a0414), with violet (#9755FF) and cold blue accent lighting.
 Photorealistic, cinematic color grade, 8K quality.
 No text in image.
-Ultra-wide panoramic format, aspect ratio 5.6:1.
+Ultra-wide panoramic format, aspect ratio 3.2:1.
 ```
 
 ---
@@ -147,14 +147,14 @@ Cenário panorâmico:
    python skills/image-ai-generator/scripts/generate.py \
      --prompt "PROMPT_MASCOTE" \
      --output "posts/{slug}/assets/mascote.png" \
-     --mode test
+     --mode production
    ```
 6. Gere `panorama-bg.jpg`:
    ```bash
    python skills/image-ai-generator/scripts/generate.py \
      --prompt "PROMPT_CENARIO" \
      --output "posts/{slug}/assets/panorama-bg.jpg" \
-     --mode test
+     --mode production
    ```
 7. Componha e fatie:
    ```bash
@@ -162,7 +162,7 @@ Cenário panorâmico:
      --background "posts/{slug}/assets/panorama-bg.jpg" \
      --character "posts/{slug}/assets/mascote.png" \
      --output-dir "posts/{slug}/assets/slices" \
-     --slides 7 \
+     --slides 4 \
      --char-position 0 \
      --char-scale 0.85
    ```

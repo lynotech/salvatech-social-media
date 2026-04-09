@@ -1,130 +1,87 @@
 #!/usr/bin/env node
 /**
- * SalvaTech — Build Slides
- * 
- * Lê o copy.md estruturado por zonas e gera os 7 HTMLs a partir dos templates.
- * O Designer (modelo fast) só precisa rodar este script.
+ * SalvaTech — Build Slides (4 slides panorâmicos)
  * 
  * Uso:
- *   node pipeline/build-slides.js --slug 2026-04-08-ia-acelera-desenvolvimento --composicao A
- * 
- * Opções:
- *   --slug        Slug do post (pasta em posts/)
- *   --composicao  Tipo de capa: A, B, C ou D
- *   --interno     Tipo de slide interno: i1, i2 ou mix (default: mix)
+ *   node pipeline/build-slides.js --slug 2026-04-09-tema-aqui
  */
 const fs = require('fs');
 const path = require('path');
 
-// ── Parse args ──
 const args = {};
 process.argv.slice(2).forEach((arg, i, arr) => {
   if (arg.startsWith('--')) args[arg.slice(2)] = arr[i + 1];
 });
 
 const slug = args.slug;
-const composicao = (args.composicao || 'A').toUpperCase();
-const interno = (args.interno || 'mix').toLowerCase();
-
-if (!slug) { console.error('Erro: --slug é obrigatório'); process.exit(1); }
+if (!slug) { console.error('Erro: --slug obrigatório'); process.exit(1); }
 
 const ROOT = path.resolve(__dirname, '..');
-const POST_DIR = path.join(ROOT, 'posts', slug);
-const COPY_FILE = path.join(POST_DIR, 'copy.md');
-const TMPL_DIR = path.join(ROOT, 'pipeline', 'templates');
-const SLIDES_DIR = path.join(POST_DIR, 'slides');
+const POST = path.join(ROOT, 'posts', slug);
+const COPY = path.join(POST, 'copy.md');
+const TMPL = path.join(ROOT, 'pipeline', 'templates');
+const OUT = path.join(POST, 'slides');
 
-// ── Verify files exist ──
-if (!fs.existsSync(COPY_FILE)) {
-  console.error(`Erro: ${COPY_FILE} não encontrado`);
-  process.exit(1);
-}
+if (!fs.existsSync(COPY)) { console.error(`Erro: ${COPY} não encontrado`); process.exit(1); }
+fs.mkdirSync(OUT, { recursive: true });
 
-fs.mkdirSync(SLIDES_DIR, { recursive: true });
-
-// ── Parse copy.md ──
-const copyRaw = fs.readFileSync(COPY_FILE, 'utf-8');
+// Parse copy.md
+const raw = fs.readFileSync(COPY, 'utf-8');
 const slides = [];
-let current = null;
-
-copyRaw.split('\n').forEach(line => {
-  const slideMatch = line.match(/^\[SLIDE\s+(\d+)/i);
-  if (slideMatch) {
-    if (current) slides.push(current);
-    current = { num: parseInt(slideMatch[1]), zones: {} };
-    return;
-  }
-  const zoneMatch = line.match(/^(ZONA_\w+)(?:\s*\([^)]*\))?\s*:\s*(.+)/i);
-  if (zoneMatch && current) {
-    current.zones[zoneMatch[1].toUpperCase()] = zoneMatch[2].trim();
-  }
+let cur = null;
+raw.split('\n').forEach(line => {
+  const m = line.match(/^\[SLIDE\s+(\d+)/i);
+  if (m) { if (cur) slides.push(cur); cur = { num: parseInt(m[1]), z: {} }; return; }
+  const z = line.match(/^(ZONA_\w+)(?:\s*\([^)]*\))?\s*:\s*(.+)/i);
+  if (z && cur) cur.z[z[1].toUpperCase()] = z[2].trim();
 });
-if (current) slides.push(current);
+if (cur) slides.push(cur);
 
-console.log(`\n  🎨 Build Slides — ${slug}`);
-console.log(`  Composição: Tipo ${composicao} | Interno: ${interno}`);
-console.log(`  Slides encontrados no copy: ${slides.length}\n`);
+console.log(`\n  Build Slides — ${slug} (${slides.length} slides)\n`);
 
-// ── Paths — agora usa slices panorâmicas ──
-// Cada slide usa sua fatia correspondente como background
-function slicePath(num) {
-  return `../assets/slices/slice-${String(num).padStart(2, '0')}.jpg`;
+function slice(n) { return `../assets/slices/slice-${String(n).padStart(2,'0')}.jpg`; }
+function read(f) { return fs.readFileSync(path.join(TMPL, f), 'utf-8'); }
+
+// Slide 01 — Capa
+const s1 = slides.find(s => s.num === 1);
+if (s1) {
+  let h = read('capa-a.html')
+    .replace('{{ZONA_LABEL}}', s1.z.ZONA_LABEL || '')
+    .replace('{{ZONA_HEADLINE_L1}}', s1.z.ZONA_HEADLINE_L1 || '')
+    .replace('{{ZONA_HEADLINE_L2}}', s1.z.ZONA_HEADLINE_L2 || '')
+    .replace('{{ZONA_SUB}}', s1.z.ZONA_SUB || '')
+    .replace('{{CAPA_JPG_PATH}}', slice(1));
+  fs.writeFileSync(path.join(OUT, 'slide-01.html'), h);
+  console.log('  ✓ slide-01.html (capa)');
 }
 
-// ── Build slide 01 (capa) ──
-const capaTemplate = fs.readFileSync(
-  path.join(TMPL_DIR, `capa-a.html`), 'utf-8'  // panorâmico sempre usa template A (imagem full-bleed)
-);
-
-const slide01 = slides.find(s => s.num === 1);
-if (slide01) {
-  let html = capaTemplate
-    .replace('{{ZONA_LABEL}}', slide01.zones.ZONA_LABEL || '')
-    .replace('{{ZONA_HEADLINE_L1}}', slide01.zones.ZONA_HEADLINE_L1 || '')
-    .replace('{{ZONA_HEADLINE_L2}}', slide01.zones.ZONA_HEADLINE_L2 || '')
-    .replace('{{ZONA_SUB}}', slide01.zones.ZONA_SUB || '')
-    .replace('{{CAPA_JPG_PATH}}', slicePath(1));
-  
-  fs.writeFileSync(path.join(SLIDES_DIR, 'slide-01.html'), html);
-  console.log('  ✓ slide-01.html (capa — slice 01)');
-}
-
-// ── Build slides 02-06 (internos) ──
-const internoSlides = slides.filter(s => s.num >= 2 && s.num <= 6);
-internoSlides.forEach((slide, idx) => {
-  let tmplName;
-  if (interno === 'i1') tmplName = 'slide-i1.html';
-  else if (interno === 'i2') tmplName = 'slide-i2.html';
-  else tmplName = idx % 2 === 0 ? 'slide-i1.html' : 'slide-i2.html'; // mix
-
-  const tmpl = fs.readFileSync(path.join(TMPL_DIR, tmplName), 'utf-8');
-  const numPad = String(slide.num).padStart(2, '0');
-
-  let html = tmpl
-    .replace('{{ZONA_LABEL}}', slide.zones.ZONA_LABEL || '')
-    .replace('{{ZONA_HEADLINE}}', slide.zones.ZONA_HEADLINE || '')
-    .replace('{{ZONA_BODY}}', slide.zones.ZONA_BODY || '')
-    .replace('{{BG_JPG_PATH}}', slicePath(slide.num))
-    .replace('{{SLIDE_NUM}}', numPad)
-    .replace('{{SLIDE_NUM_DISPLAY}}', `${numPad} / 07`);
-
-  fs.writeFileSync(path.join(SLIDES_DIR, `slide-${numPad}.html`), html);
-  console.log(`  ✓ slide-${numPad}.html (${tmplName.replace('.html','')}) — slice ${numPad}`);
+// Slides internos (02, 03)
+slides.filter(s => s.num >= 2 && s.num <= 3).forEach((s, i) => {
+  const tmpl = i % 2 === 0 ? 'slide-i1.html' : 'slide-i2.html';
+  const n = String(s.num).padStart(2, '0');
+  let h = read(tmpl)
+    .replace('{{ZONA_LABEL}}', s.z.ZONA_LABEL || '')
+    .replace('{{ZONA_HEADLINE}}', s.z.ZONA_HEADLINE || '')
+    .replace('{{ZONA_BODY}}', s.z.ZONA_BODY || '')
+    .replace('{{BG_JPG_PATH}}', slice(s.num))
+    .replace('{{SLIDE_NUM}}', n)
+    .replace('{{SLIDE_NUM_DISPLAY}}', `${n} / 04`);
+  fs.writeFileSync(path.join(OUT, `slide-${n}.html`), h);
+  console.log(`  ✓ slide-${n}.html`);
 });
 
-// ── Build slide 07 (CTA) ──
-const ctaSlide = slides.find(s => s.num === 7);
-if (ctaSlide) {
-  const ctaTmpl = fs.readFileSync(path.join(TMPL_DIR, 'slide-cta.html'), 'utf-8');
-  let html = ctaTmpl
-    .replace('{{ZONA_HEADLINE_L1}}', ctaSlide.zones.ZONA_HEADLINE_L1 || '')
-    .replace('{{ZONA_HEADLINE_L2}}', ctaSlide.zones.ZONA_HEADLINE_L2 || '')
-    .replace('{{ZONA_BODY}}', ctaSlide.zones.ZONA_BODY || '')
-    .replace('{{ZONA_CTA}}', ctaSlide.zones.ZONA_CTA || '')
-    .replace('{{BG_JPG_PATH}}', slicePath(7));
-
-  fs.writeFileSync(path.join(SLIDES_DIR, 'slide-07.html'), html);
-  console.log('  ✓ slide-07.html (cta)');
+// Slide 04 — CTA
+const s4 = slides.find(s => s.num === 4);
+if (s4) {
+  let h = read('slide-cta.html')
+    .replace('{{ZONA_HEADLINE_L1}}', s4.z.ZONA_HEADLINE_L1 || '')
+    .replace('{{ZONA_HEADLINE_L2}}', s4.z.ZONA_HEADLINE_L2 || '')
+    .replace('{{ZONA_BODY}}', s4.z.ZONA_BODY || '')
+    .replace('{{ZONA_CTA}}', s4.z.ZONA_CTA || '')
+    .replace('{{BG_JPG_PATH}}', slice(4))
+    .replace('07 / 07', '04 / 04');
+  fs.writeFileSync(path.join(OUT, 'slide-04.html'), h);
+  console.log('  ✓ slide-04.html (cta)');
 }
 
-console.log(`\n  Pronto! ${fs.readdirSync(SLIDES_DIR).length} slides em posts/${slug}/slides/\n`);
+console.log(`\n  ${fs.readdirSync(OUT).filter(f=>f.endsWith('.html')).length} slides em posts/${slug}/slides/\n`);

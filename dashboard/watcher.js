@@ -48,6 +48,33 @@ Aguarde resposta. Se approved=false, ajuste conforme o feedback.
 
 EXECUTE TUDO SEM PERGUNTAR. Comece agora.`,
 
+  copys: `Voce é o Orquestrador da SalvaTech. Os temas ja foram definidos e aprovados. Gere APENAS os copys e legendas AGORA, sem pesquisar temas novos.
+
+PASSO 1 — Notifique o dashboard:
+node dashboard/notify.js '{"pipeline":"running","step":1,"stepStatus":"done","step":2,"stepStatus":"done"}'
+node dashboard/notify.js '{"step":3,"stepStatus":"active","agent":"copywriter","status":"working","message":"Escrevendo copys...","log":"Copywriter iniciou","logType":"agent"}'
+
+PASSO 2 — Leia os briefs existentes:
+- Liste as pastas em posts/ que tem brief.md
+- Para cada post, leia o brief.md
+- NAO crie temas novos, NAO pesquise, NAO mude os briefs
+
+PASSO 3 — Gere os copys:
+- Leia agents/copywriter.agent.md para o formato e regras
+- Leia pipeline/steps/03-copywriter.md para o processo
+- Para cada post, gere copy.md e legenda.md seguindo o formato panoramico
+- Maximo 20 palavras por slide, arco narrativo, ZONA_BODY opcional
+
+PASSO 4 — Checkpoint de copys (APROVACAO VIA DASHBOARD):
+node dashboard/notify.js --checkpoint '{"agent":"orquestrador","question":"Aprova os 8 copys?","items":["Post 1: titulo","Post 2: titulo","..."]}'
+Aguarde resposta. Se approved=false, ajuste conforme o feedback.
+
+PASSO 5 — Finalize:
+node dashboard/notify.js '{"step":3,"stepStatus":"done","agent":"copywriter","status":"done","message":"Copys prontos!","log":"Copywriter concluiu","logType":"ok"}'
+node dashboard/notify.js '{"pipeline":"done","agent":"orquestrador","status":"done","message":"Copys prontos!","log":"Copys e legendas gerados","logType":"ok"}'
+
+EXECUTE TUDO SEM PERGUNTAR. NAO pesquise temas. NAO mude briefs. Comece agora.`,
+
   artes: `Voce é o Orquestrador da SalvaTech. Gere as artes da semana AGORA, sem perguntar nada.
 
 PASSO 1 — Identifique os 2 posts da semana atual em posts/ que ja tem brief.md e copy.md
@@ -56,11 +83,11 @@ PASSO 2 — Para cada post, execute o Ilustrador (carrossel panoramico):
 node dashboard/notify.js '{"pipeline":"running","step":5,"stepStatus":"active","agent":"ilustrador","status":"working","message":"Gerando arte...","log":"Ilustrador iniciou","logType":"agent"}'
 - Leia pipeline/steps/05-ilustrador.md e agents/ilustrador.agent.md
 - Gere o MASCOTE (fundo escuro solido, sem cenario):
-  python skills/image-ai-generator/scripts/generate.py --prompt "PROMPT_MASCOTE_AQUI" --output "posts/{slug}/assets/mascote.png" --mode test
+  python skills/image-ai-generator/scripts/generate.py --prompt "PROMPT_MASCOTE_AQUI" --output "posts/{slug}/assets/mascote.png" --mode production
 - Gere o CENARIO PANORAMICO (ultra-wide, sem personagem):
-  python skills/image-ai-generator/scripts/generate.py --prompt "PROMPT_CENARIO_AQUI" --output "posts/{slug}/assets/panorama-bg.jpg" --mode test
+  python skills/image-ai-generator/scripts/generate.py --prompt "PROMPT_CENARIO_AQUI" --output "posts/{slug}/assets/panorama-bg.jpg" --mode production
 - COMPONHA e FATIE:
-  python pipeline/compose-panorama.py --background "posts/{slug}/assets/panorama-bg.jpg" --character "posts/{slug}/assets/mascote.png" --output-dir "posts/{slug}/assets/slices" --slides 7 --char-position 0 --char-scale 0.85
+  python pipeline/compose-panorama.py --background "posts/{slug}/assets/panorama-bg.jpg" --character "posts/{slug}/assets/mascote.png" --output-dir "posts/{slug}/assets/slices" --slides 4 --char-position 0 --char-scale 0.85
 
 PASSO 3 — Monte os slides HTML:
 node dashboard/notify.js '{"step":6,"stepStatus":"active","agent":"designer","status":"working","message":"Montando slides...","log":"Designer iniciou","logType":"agent"}'
@@ -73,7 +100,11 @@ node dashboard/notify.js '{"step":7,"stepStatus":"active","agent":"designer","st
 PASSO 5 — Finalize:
 node dashboard/notify.js '{"pipeline":"done","agent":"orquestrador","status":"done","message":"Artes prontas!","log":"Artes da semana concluidas","logType":"ok"}'
 
-EXECUTE TUDO SEM PERGUNTAR. Comece agora.`
+EXECUTE TUDO SEM PERGUNTAR. Comece agora.`,
+
+  arte1: `Voce é o Orquestrador da SalvaTech. Gere a arte APENAS do PRIMEIRO post da semana atual. Identifique o post com a data mais proxima em posts/ que tenha copy.md mas NAO tenha assets/slices/. Execute o mesmo fluxo do Ilustrador (mascote + panorama + compose + build-slides + render PNGs) apenas para esse post. Use node dashboard/notify.js para atualizar o dashboard. EXECUTE SEM PERGUNTAR.`,
+
+  arte2: `Voce é o Orquestrador da SalvaTech. Gere a arte APENAS do SEGUNDO post da semana atual. Identifique o segundo post com a data mais proxima em posts/ que tenha copy.md mas NAO tenha assets/slices/. Execute o mesmo fluxo do Ilustrador (mascote + panorama + compose + build-slides + render PNGs) apenas para esse post. Use node dashboard/notify.js para atualizar o dashboard. EXECUTE SEM PERGUNTAR.`
 };
 
 function pollCommand() {

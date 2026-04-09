@@ -26,7 +26,7 @@ Construa o prompt seguindo o agent `agents/ilustrador.agent.md`:
 python skills/image-ai-generator/scripts/generate.py \
   --prompt "{PROMPT_MASCOTE}" \
   --output "posts/{slug}/assets/mascote.png" \
-  --mode test
+  --mode production
 ```
 
 ### 2. Cenário panorâmico (`panorama-bg.jpg`)
@@ -37,7 +37,7 @@ Imagem ultra-wide SEM personagem, conectada ao tema:
 python skills/image-ai-generator/scripts/generate.py \
   --prompt "Ultra-wide panoramic scene, {DESCRICAO_AMBIENTE}. {ILUMINACAO}. No characters, no people, no animals — environment only. The scene extends horizontally with visual interest distributed across the entire width. Base color very dark near black, with violet and cold blue accent lighting. Photorealistic, cinematic, 8K. No text. Ultra-wide panoramic format." \
   --output "posts/{slug}/assets/panorama-bg.jpg" \
-  --mode test
+  --mode production
 ```
 
 ### 3. Composição + fatiamento
@@ -49,31 +49,28 @@ python pipeline/compose-panorama.py \
   --background "posts/{slug}/assets/panorama-bg.jpg" \
   --character "posts/{slug}/assets/mascote.png" \
   --output-dir "posts/{slug}/assets/slices" \
-  --slides 7 \
+  --slides 4 \
   --char-position 0 \
   --char-scale 0.85
 ```
 
 Opções de `--char-position` (em qual slide o mascote aparece):
 - `0` = slide 1 (capa) — padrão
-- `3` = slide 4 (centro do carrossel)
-- `6` = slide 7 (último slide)
+- `1` = slide 2
+- `3` = slide 4 (último)
 
 ## Output esperado
 
 ```
 posts/{slug}/assets/
-├── mascote.png          ← mascote com fundo escuro
-├── panorama-bg.jpg      ← cenário panorâmico ultra-wide
-├── panorama-full.jpg    ← composição completa (mascote + cenário)
+├── mascote.png
+├── panorama-bg.jpg
+├── panorama-full.jpg
 └── slices/
-    ├── slice-01.jpg     ← fatia do slide 1 (com mascote se char-position=0)
+    ├── slice-01.jpg
     ├── slice-02.jpg
     ├── slice-03.jpg
-    ├── slice-04.jpg
-    ├── slice-05.jpg
-    ├── slice-06.jpg
-    └── slice-07.jpg
+    └── slice-04.jpg
 ```
 
 ## Veto Conditions

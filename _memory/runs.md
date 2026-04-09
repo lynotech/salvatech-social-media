@@ -28,7 +28,7 @@
 | Post | Slug | Pilar | Composição | Canal | Status |
 |------|------|-------|------------|-------|--------|
 | 1 | 2026-05-06-erp-obsoleto-esta-travando-sua-empresa | VALOR PRÁTICO | C | IG+TT | copy ok |
-| 2 | 2026-05-08-bastidores-onboarding-de-clientes | BASTIDORES | A | IG+TT | copy ok |
+| 2 | 2026-05-08-bastidores-onboarding-de-clientes | BASTIDORES | A | IG+TT | artes ok — enquadramento: three-quarter medium shot, piloto no cockpit, glow violet |
 | 3 | 2026-05-11-ipa-nova-geracao-alem-do-rpa | AUTORIDADE | D | LinkedIn | copy ok |
 | 4 | 2026-05-13-5-sinais-empresa-pronta-automatizar | VALOR PRÁTICO | B | IG+TT | copy ok |
 | 5 | 2026-05-20-digitalizar-nao-e-suficiente-o-que-vem-depois | PROVOCAÇÃO | C | IG+TT | copy ok |
