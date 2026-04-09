@@ -28,7 +28,7 @@ const data = Buffer.from(json, 'utf-8');
 
 const req = http.request({
   hostname: 'localhost',
-  port: 3737,
+  port: 3000,
   path: endpoint,
   method: 'POST',
   headers: { 'Content-Type': 'application/json', 'Content-Length': data.length },

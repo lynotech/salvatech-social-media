@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&family=Syne:wght@800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1080px; height: 1350px; overflow: hidden; background: #0a0414; }
+  .canvas { position: relative; width: 1080px; height: 1350px; overflow: hidden; }
+
+  .bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+
+  /* Overlay na base — texto embaixo, mascote visível no topo */
+  .overlay {
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 55%;
+    background: linear-gradient(0deg, rgba(10,4,20,0.95) 0%, rgba(10,4,20,0.7) 60%, transparent 100%);
+    z-index: 1;
+  }
+
+  .texto {
+    position: absolute; bottom: 80px; left: 0; width: 100%;
+    z-index: 2; padding: 0 64px;
+  }
+  .label {
+    font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600;
+    letter-spacing: 0.3em; text-transform: uppercase; color: #9755FF;
+    margin-bottom: 20px; display: inline-block;
+    padding: 8px 20px; border: 1px solid rgba(151,85,255,0.35);
+    border-radius: 6px; background: rgba(151,85,255,0.08);
+  }
+  .headline {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 96px; line-height: 0.92; text-transform: uppercase;
+  }
+  .headline .l1 { color: #fff; display: block; text-shadow: 0 4px 40px rgba(0,0,0,0.6); }
+  .headline .l2 { color: #9755FF; display: block; }
+  .sub {
+    font-family: 'Outfit', sans-serif; font-size: 26px; color: #c49aff;
+    margin-top: 24px; font-weight: 300; max-width: 80%;
+  }
+
+  .rodape {
+    position: absolute; bottom: 0; width: 100%; height: 72px; z-index: 3;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(10,4,20,0.92);
+  }
+  .rodape .logo { height: 36px; width: auto; }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <img class="bg" src="/posts/2026-04-09-pme-falham-digitalizacao/assets/capa.jpg" alt="">
+  <div class="overlay"></div>
+  <div class="texto">
+    <div class="label">DIGITALIZAÇÃO</div>
+    <div class="headline">
+      <span class="l1">78% DAS PMEs</span>
+      <span class="l2">FALHAM NA VIRADA</span>
+    </div>
+    <div class="sub">Começa pelo sistema errado. Sempre.</div>
+  </div>
+  <div class="rodape">
+    <img class="logo" src="/logo.png" alt="SalvaTech">
+  </div>
+</div>
+</body>
+</html>

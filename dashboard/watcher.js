@@ -110,7 +110,7 @@ Use node dashboard/notify.js pra atualizar status a cada passo. EXECUTE TUDO SEM
 
 function pollCommand() {
   if (busy) return;
-  const req = http.get('http://localhost:3737/api/command', res => {
+  const req = http.get('http://localhost:3000/api/command', res => {
     let body = '';
     res.on('data', c => body += c);
     res.on('end', () => {
@@ -160,7 +160,7 @@ function notify(obj) {
   const json = JSON.stringify(obj);
   const data = Buffer.from(json, 'utf-8');
   const req = http.request({
-    hostname: 'localhost', port: 3737, path: '/api/status',
+    hostname: 'localhost', port: 3000, path: '/api/status',
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Content-Length': data.length }
   }, () => {});

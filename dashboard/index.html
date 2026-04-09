@@ -3,336 +3,222 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SalvaTech · Agent Room</title>
+<title>Salvatech · Agent Room</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap');
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:#000;font-family:'Syne',sans-serif;overflow:hidden;width:100vw;height:100vh}
-
   .scene{position:relative;width:100vw;height:100vh;overflow:hidden}
   .layer{position:absolute;top:0;left:0;width:100%;height:100%}
-  .layer img{width:100%;height:100%;object-fit:cover}
-
-  /* Effects */
-  .scanlines{position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.02) 2px,rgba(0,0,0,.02) 4px);pointer-events:none;z-index:10}
-  .vignette{position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.5) 100%);pointer-events:none;z-index:8}
-
-  /* HUD */
+  .layer img{width:100%;height:100%;object-fit:cover;object-position:center}
+  #particles{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5}
   .hud{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:20}
-
-  /* Topbar */
-  .topbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:linear-gradient(to bottom,rgba(0,0,0,.75) 0%,transparent 100%);pointer-events:all}
-  .logo-area{display:flex;align-items:center;gap:12px}
-  .logo-area img{height:40px;width:auto}
+  .topbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:linear-gradient(to bottom,rgba(0,0,0,0.75)0%,transparent 100%);pointer-events:all}
+  .logo{display:flex;align-items:center;gap:10px}
+  .logo-mark{width:36px;height:36px;background:#7c5cfc;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 20px #7c5cfc88}
+  .logo-name{font-size:16px;font-weight:800;color:#fff;letter-spacing:.02em}
+  .logo-sub{font-size:10px;color:#8b84a8;font-family:'DM Mono',monospace}
   .topbar-right{display:flex;align-items:center;gap:10px}
-  .pill{display:flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid rgba(255,255,255,.12);border-radius:20px;font-size:11px;font-family:'DM Mono',monospace;color:rgba(255,255,255,.5);background:rgba(0,0,0,.5);backdrop-filter:blur(10px)}
+  .pill{display:flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid rgba(255,255,255,.15);border-radius:20px;font-size:11px;font-family:'DM Mono',monospace;color:rgba(255,255,255,.6);background:rgba(0,0,0,.5);backdrop-filter:blur(10px)}
   .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-  .dg{background:#22d687;box-shadow:0 0 8px #22d687}
+  .dg{background:#22d687;box-shadow:0 0 8px #22d687;animation:pd 2s infinite}
   .da{background:#f5a623;box-shadow:0 0 8px #f5a623}
-  .dp{background:#9755FF;box-shadow:0 0 8px #9755FF;animation:pd 1.5s infinite}
-  .dr{background:#e94560;box-shadow:0 0 8px #e94560}
+  .dp{background:#7c5cfc;box-shadow:0 0 8px #7c5cfc;animation:pd 1.5s infinite}
   @keyframes pd{0%,100%{opacity:1}50%{opacity:.4}}
-
-  /* Agent characters */
-  .agent-char{position:absolute;z-index:6;image-rendering:auto}
-  .agent-char img{height:100%;width:auto;image-rendering:auto}
-  #char-boss{bottom:18%;left:30%;height:38%}
-  #char-estrategista{bottom:22%;left:2%;height:30%}
-  #char-designer{bottom:20%;left:42%;height:32%}
-  #char-copywriter{bottom:22%;right:22%;height:30%}
-  #char-analista{bottom:20%;right:2%;height:28%}
-
-  /* Desk */
-  #mesa-central{position:absolute;bottom:10%;left:50%;transform:translateX(-50%);height:22%;z-index:4}
-  #mesa-central img{height:100%;width:auto}
-
-  /* Bounce animation for working agents */
-  .agent-char.working img{animation:bounce .8s ease-in-out infinite}
-  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-
-  /* Tags */
   .tag{position:absolute;pointer-events:all;cursor:pointer;z-index:25}
-  .tag-inner{background:rgba(0,0,0,.78);border:1px solid rgba(151,85,255,.5);border-radius:8px;padding:5px 10px;backdrop-filter:blur(8px);white-space:nowrap;transition:all .2s}
-  .tag:hover .tag-inner{background:rgba(151,85,255,.2);border-color:#9755FF;box-shadow:0 0 16px rgba(151,85,255,.4)}
+  .tag-inner{background:rgba(0,0,0,.78);border:1px solid rgba(124,92,252,.6);border-radius:8px;padding:5px 10px;backdrop-filter:blur(8px);white-space:nowrap;transition:all .2s}
+  .tag:hover .tag-inner{background:rgba(124,92,252,.22);border-color:#7c5cfc;box-shadow:0 0 16px #7c5cfc55}
   .tag-name{font-size:11px;font-weight:700;color:#fff;display:flex;align-items:center;gap:5px}
   .tag-role{font-size:9px;color:#8b84a8;font-family:'DM Mono',monospace;margin-top:1px}
   .tag-status{font-size:9px;font-family:'DM Mono',monospace;margin-top:3px;display:flex;align-items:center;gap:4px}
-
-  /* Bubbles */
   .bubble{position:absolute;z-index:30;pointer-events:none;opacity:0;transform:translateY(6px) scale(.9);transition:opacity .3s,transform .3s}
   .bubble.show{opacity:1;transform:translateY(0) scale(1)}
-  .bubble-inner{background:rgba(8,6,18,.93);border:1px solid rgba(151,85,255,.5);border-radius:10px;padding:8px 12px;max-width:220px;font-size:11px;color:rgba(255,255,255,.85);line-height:1.5;font-family:'DM Mono',monospace;box-shadow:0 0 20px rgba(151,85,255,.2)}
+  .bubble-inner{background:rgba(8,6,18,.93);border:1px solid rgba(124,92,252,.5);border-radius:10px;padding:8px 12px;max-width:200px;font-size:11px;color:rgba(255,255,255,.85);line-height:1.5;font-family:'DM Mono',monospace;position:relative;box-shadow:0 0 20px rgba(124,92,252,.25)}
   .bubble-inner::after{content:'';position:absolute;bottom:-6px;left:16px;width:10px;height:6px;background:rgba(8,6,18,.93);clip-path:polygon(0 0,100% 0,50% 100%)}
-  .bubble-author{font-size:9px;color:#9755FF;font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em}
+  .bubble-author{font-size:9px;color:#7c5cfc;font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em}
+  .scanlines{position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px);pointer-events:none;z-index:10}
+  .vignette{position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.55) 100%);pointer-events:none;z-index:8}
+  .holo-glow{position:absolute;width:220px;height:110px;background:radial-gradient(ellipse,rgba(80,160,255,.2) 0%,transparent 70%);border-radius:50%;pointer-events:none;z-index:7;animation:hgp 3s ease-in-out infinite;left:50%;top:42%;transform:translate(-50%,-50%)}
+  @keyframes hgp{0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.18)}}
 
-  /* Side panel */
-  .sidepanel{position:absolute;right:0;top:50%;transform:translateY(-50%);width:170px;display:flex;flex-direction:column;gap:6px;padding:12px;pointer-events:all;z-index:25}
-  .acard{background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 10px;cursor:pointer;transition:all .2s;backdrop-filter:blur(12px)}
-  .acard:hover,.acard.active{border-color:#9755FF;background:rgba(151,85,255,.15);box-shadow:0 0 14px rgba(151,85,255,.3)}
+  /* bottom panel — movido pra lateral direita pra nao cobrir os agents */
+  .sidepanel{position:absolute;right:0;top:50%;transform:translateY(-50%);width:160px;display:flex;flex-direction:column;gap:6px;padding:12px;pointer-events:all;z-index:25}
+  .acard{background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 10px;cursor:pointer;transition:all .2s;backdrop-filter:blur(12px)}
+  .acard:hover,.acard.active{border-color:#7c5cfc;background:rgba(124,92,252,.18);box-shadow:0 0 14px rgba(124,92,252,.35)}
   .acard-name{font-size:11px;font-weight:700;color:#fff}
   .acard-task{font-size:9px;color:#8b84a8;font-family:'DM Mono',monospace;margin-top:2px}
-  .acard-bar{height:2px;background:rgba(255,255,255,.08);border-radius:1px;margin-top:5px;overflow:hidden}
-  .acard-fill{height:100%;border-radius:1px;background:#9755FF;transition:width .6s}
+  .acard-bar{height:2px;background:rgba(255,255,255,.1);border-radius:1px;margin-top:5px;overflow:hidden}
+  .acard-fill{height:100%;border-radius:1px;background:#7c5cfc;transition:width .6s}
 
-  /* Bottom bar */
-  .bottombar{position:absolute;bottom:0;left:0;right:0;padding:10px 20px;background:linear-gradient(to top,rgba(0,0,0,.7) 0%,transparent 100%);display:flex;align-items:center;justify-content:space-between;pointer-events:all;z-index:25}
-  .bottom-left{display:flex;align-items:center;gap:12px}
-  .log-mini{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.4);max-width:500px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .action-row{display:flex;gap:6px;align-items:center}
-  .action-select{padding:7px 28px 7px 10px;border-radius:6px;background:rgba(0,0,0,.6);border:1px solid rgba(151,85,255,.2);color:#c49aff;font-family:'DM Mono',monospace;font-size:10px;outline:none;cursor:pointer;appearance:none;backdrop-filter:blur(8px);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%239755FF' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
-  .action-select option{background:#110820;color:#c49aff}
-  .btn-go{padding:7px 16px;border-radius:6px;border:none;background:#9755FF;color:#fff;font-family:'DM Mono',monospace;font-size:10px;font-weight:500;cursor:pointer;transition:background .2s}
-  .btn-go:hover{background:#7a3de8}
+  .bottombar{position:absolute;bottom:0;left:0;right:0;padding:12px 20px;background:linear-gradient(to top,rgba(0,0,0,.7)0%,transparent 100%);display:flex;align-items:center;justify-content:space-between;pointer-events:all}
+  .time-display{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.4)}
+  .time-val{font-size:18px;color:rgba(255,255,255,.7);font-weight:500}
+  .bottom-pills{display:flex;gap:8px}
 
-  /* Modal */
-  .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:100;align-items:center;justify-content:center}
-  .modal-overlay.visible{display:flex}
-  .modal{background:#110820;border:1px solid rgba(151,85,255,.3);border-radius:12px;padding:28px;width:500px;max-width:90vw;max-height:80vh;overflow-y:auto;box-shadow:0 0 80px rgba(151,85,255,.1)}
-  .modal-header{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid rgba(151,85,255,.12)}
-  .modal-title{font-size:14px;font-weight:700;color:#f59e0b}
-  .modal-question{font-size:13px;color:#c49aff;line-height:1.6;margin-bottom:16px}
-  .modal-items{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
-  .modal-item{background:rgba(10,4,20,.6);border:1px solid rgba(151,85,255,.12);border-radius:6px;padding:10px 12px;font-size:12px;color:#9980cc;line-height:1.5}
-  .modal-input{width:100%;min-height:60px;padding:12px;border-radius:8px;background:rgba(10,4,20,.8);border:1px solid rgba(151,85,255,.15);color:#fff;font-family:'Syne',sans-serif;font-size:12px;resize:vertical;outline:none;margin-bottom:16px}
-  .modal-input:focus{border-color:#9755FF}
-  .modal-input::placeholder{color:#444}
-  .modal-actions{display:flex;gap:10px}
-  .modal-btn{flex:1;padding:11px;border-radius:8px;border:none;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
-  .modal-btn.approve{background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25)}
-  .modal-btn.approve:hover{background:rgba(74,222,128,.25)}
-  .modal-btn.adjust{background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.25)}
-  .modal-btn.adjust:hover{background:rgba(245,158,11,.25)}
+  #chimp-boss{animation:bs 4s ease-in-out infinite}
+  #chimp-pointer{animation:sw 5s ease-in-out infinite}
+  #chimp-holo{animation:fl 3.5s ease-in-out infinite}
+  #chimp-tablet{animation:tl 6s ease-in-out infinite}
+  #chimp-monitors{animation:bf 3s ease-in-out infinite}
+  #holo-desk{animation:hdp 2.5s ease-in-out infinite}
+  @keyframes bs{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  @keyframes sw{0%,100%{transform:translateX(0) rotate(0deg)}33%{transform:translateX(-3px) rotate(-.5deg)}66%{transform:translateX(3px) rotate(.5deg)}}
+  @keyframes fl{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.01)}}
+  @keyframes tl{0%,100%{transform:rotate(0deg) translateY(0)}25%{transform:rotate(.8deg) translateY(-2px)}75%{transform:rotate(-.8deg) translateY(-4px)}}
+  @keyframes bf{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  @keyframes hdp{0%,100%{opacity:.85;filter:brightness(1)}50%{opacity:1;filter:brightness(1.25)}}
+  .ripple{position:absolute;border-radius:50%;border:2px solid #7c5cfc;pointer-events:none;z-index:50;animation:ro .6s ease-out forwards;transform:translate(-50%,-50%)}
+  @keyframes ro{0%{width:20px;height:20px;opacity:1}100%{width:80px;height:80px;opacity:0}}
 </style>
 </head>
 <body>
 <div class="scene" id="scene">
-  <!-- Background -->
-  <div class="layer" style="z-index:1"><img src="personagens/bgescritorio.png" alt=""></div>
-
-  <!-- Mesa central -->
-  <div id="mesa-central"><img src="personagens/mesacentral.png" alt=""></div>
-
-  <!-- Characters -->
-  <div class="agent-char" id="char-boss"><img src="personagens/boss.png" alt=""></div>
-  <div class="agent-char" id="char-estrategista"><img src="personagens/estrategista.png" alt=""></div>
-  <div class="agent-char" id="char-designer"><img src="personagens/Designer.png" alt=""></div>
-  <div class="agent-char" id="char-copywriter"><img src="personagens/copywriter.png" alt=""></div>
-  <div class="agent-char" id="char-analista"><img src="personagens/analista.png" alt=""></div>
-
-  <!-- Effects -->
+  <!-- bg normal, sem blend -->
+  <div class="layer" style="z-index:1"><img src="personagens/bgescritorio.png" alt="bg"></div>
+  <!-- personagens com transparência real, sem mix-blend-mode -->
+  <div class="layer" style="z-index:2" id="holo-desk"><img src="personagens/mesacentral.png" alt="holo"></div>
+  <div class="layer" style="z-index:3" id="chimp-boss"><img src="personagens/boss.png" alt="boss"></div>
+  <div class="layer" style="z-index:3" id="chimp-pointer"><img src="personagens/estrategista.png" alt="pointer"></div>
+  <div class="layer" style="z-index:3" id="chimp-holo"><img src="personagens/Designer.png" alt="holo op"></div>
+  <div class="layer" style="z-index:3" id="chimp-tablet"><img src="personagens/copywriter.png" alt="tablet"></div>
+  <div class="layer" style="z-index:3" id="chimp-monitors"><img src="personagens/analista.png" alt="monitors"></div>
+  <div class="holo-glow"></div>
   <div class="scanlines"></div>
   <div class="vignette"></div>
-
-  <!-- HUD -->
+  <canvas id="particles"></canvas>
   <div class="hud">
-    <!-- Topbar -->
     <div class="topbar">
-      <div class="logo-area">
-        <img src="logo.png" alt="SalvaTech">
+      <div class="logo">
+        <img src="logo.png" alt="SalvaTech" style="height:44px;width:auto">
+        <div><div class="logo-sub">agent room</div></div>
       </div>
       <div class="topbar-right">
         <div class="pill"><span class="dot" id="connDot"></span><span id="connLabel">offline</span></div>
         <div class="pill"><span class="dot dp"></span><span id="globalStatus">idle</span></div>
+        <div class="pill"><span class="dot da"></span>ao vivo</div>
       </div>
     </div>
 
-    <!-- Agent tags -->
-    <div class="tag" style="bottom:58%;left:32%" id="tag-orquestrador">
+    <!-- tags dos agents -->
+    <div class="tag" style="bottom:32%;left:34%" id="tag-boss">
       <div class="tag-inner">
-        <div class="tag-name"><span class="dot dg" id="dot-orquestrador"></span>Orquestrador</div>
-        <div class="tag-role">coordenação</div>
-        <div class="tag-status" id="status-orquestrador">idle</div>
+        <div class="tag-name"><span class="dot dg" style="width:6px;height:6px"></span>Boss</div>
+        <div class="tag-role">comandante · aprovações</div>
+        <div class="tag-status"><span style="color:#22d687">●</span> aguardando aprovação</div>
       </div>
     </div>
-    <div class="tag" style="bottom:54%;left:3%" id="tag-estrategista">
+    <div class="tag" style="top:18%;left:4%" id="tag-pointer">
       <div class="tag-inner">
-        <div class="tag-name"><span class="dot dg" id="dot-estrategista"></span>Estrategista</div>
-        <div class="tag-role">pesquisa · temas</div>
-        <div class="tag-status" id="status-estrategista">idle</div>
+        <div class="tag-name"><span class="dot dg" style="width:6px;height:6px"></span>Estrategista</div>
+        <div class="tag-role">briefing · tendências</div>
+        <div class="tag-status"><span style="color:#7c5cfc">●</span> analisando pauta</div>
       </div>
     </div>
-    <div class="tag" style="bottom:54%;left:44%" id="tag-designer">
+    <div class="tag" style="top:14%;left:42%" id="tag-holo">
       <div class="tag-inner">
-        <div class="tag-name"><span class="dot dg" id="dot-designer"></span>Designer</div>
-        <div class="tag-role">slides · render</div>
-        <div class="tag-status" id="status-designer">idle</div>
+        <div class="tag-name"><span class="dot dp" style="width:6px;height:6px"></span>Designer</div>
+        <div class="tag-role">visual · prompt · layout</div>
+        <div class="tag-status"><span style="color:#7c5cfc">●</span> gerando imagem #7</div>
       </div>
     </div>
-    <div class="tag" style="bottom:54%;right:23%" id="tag-copywriter">
+    <div class="tag" style="top:20%;right:28%" id="tag-tablet">
       <div class="tag-inner">
-        <div class="tag-name"><span class="dot dg" id="dot-copywriter"></span>Copywriter</div>
-        <div class="tag-role">copy · legendas</div>
-        <div class="tag-status" id="status-copywriter">idle</div>
+        <div class="tag-name"><span class="dot dg" style="width:6px;height:6px"></span>Copywriter</div>
+        <div class="tag-role">caption · hashtags · CTA</div>
+        <div class="tag-status"><span style="color:#22d687">●</span> escrevendo post #12</div>
       </div>
     </div>
-    <div class="tag" style="bottom:52%;right:3%" id="tag-ilustrador">
+    <div class="tag" style="top:8%;right:4%" id="tag-monitors">
       <div class="tag-inner">
-        <div class="tag-name"><span class="dot dg" id="dot-ilustrador"></span>Ilustrador</div>
-        <div class="tag-role">imagens · arte</div>
-        <div class="tag-status" id="status-ilustrador">idle</div>
+        <div class="tag-name"><span class="dot da" style="width:6px;height:6px"></span>Analista</div>
+        <div class="tag-role">métricas · relatórios</div>
+        <div class="tag-status"><span style="color:#f5a623">●</span> monitorando alcance</div>
       </div>
     </div>
 
-    <!-- Bubbles -->
-    <div class="bubble" id="bub-orquestrador" style="bottom:64%;left:32%"><div class="bubble-inner"><div class="bubble-author">Orquestrador</div><span id="bub-text-orquestrador">...</span></div></div>
-    <div class="bubble" id="bub-estrategista" style="bottom:60%;left:3%"><div class="bubble-inner"><div class="bubble-author">Estrategista</div><span id="bub-text-estrategista">...</span></div></div>
-    <div class="bubble" id="bub-designer" style="bottom:60%;left:44%"><div class="bubble-inner"><div class="bubble-author">Designer</div><span id="bub-text-designer">...</span></div></div>
-    <div class="bubble" id="bub-copywriter" style="bottom:60%;right:23%"><div class="bubble-inner"><div class="bubble-author">Copywriter</div><span id="bub-text-copywriter">...</span></div></div>
-    <div class="bubble" id="bub-ilustrador" style="bottom:58%;right:3%"><div class="bubble-inner"><div class="bubble-author">Ilustrador</div><span id="bub-text-ilustrador">...</span></div></div>
+    <!-- bubbles -->
+    <div class="bubble" id="bubble-boss" style="bottom:46%;left:26%"><div class="bubble-inner"><div class="bubble-author">Orquestrador</div><span>...</span></div></div>
+    <div class="bubble" id="bubble-designer" style="top:30%;left:38%"><div class="bubble-inner"><div class="bubble-author">Designer</div><span>...</span></div></div>
+    <div class="bubble" id="bubble-copy" style="top:36%;right:24%"><div class="bubble-inner"><div class="bubble-author">Copywriter</div><span>...</span></div></div>
+    <div class="bubble" id="bubble-est" style="top:32%;left:2%"><div class="bubble-inner"><div class="bubble-author">Estrategista</div><span>...</span></div></div>
 
-    <!-- Side panel -->
-    <div class="sidepanel" id="sidepanel"></div>
+    <!-- side panel de agents (nao cobre personagens) -->
+    <div class="sidepanel">
+      <div class="acard active" onclick="focusAgent(event,'boss')"><div class="acard-name">👑 Boss</div><div class="acard-task">3 aprovações</div><div class="acard-bar"><div class="acard-fill" id="bar-boss" style="width:90%;background:#22d687"></div></div></div>
+      <div class="acard" onclick="focusAgent(event,'designer')"><div class="acard-name">🎨 Designer</div><div class="acard-task">gerando post #7</div><div class="acard-bar"><div class="acard-fill" id="bar-designer" style="width:65%"></div></div></div>
+      <div class="acard" onclick="focusAgent(event,'copy')"><div class="acard-name">✍️ Copywriter</div><div class="acard-task">escrevendo</div><div class="acard-bar"><div class="acard-fill" id="bar-copy" style="width:80%;background:#22d687"></div></div></div>
+      <div class="acard" onclick="focusAgent(event,'estrategista')"><div class="acard-name">📊 Estrategista</div><div class="acard-task">analisando</div><div class="acard-bar"><div class="acard-fill" id="bar-est" style="width:45%;background:#f5a623"></div></div></div>
+      <div class="acard" onclick="focusAgent(event,'analista')"><div class="acard-name">📈 Analista</div><div class="acard-task">monitorando</div><div class="acard-bar"><div class="acard-fill" id="bar-ana" style="width:100%;background:#f5a623"></div></div></div>
+    </div>
 
-    <!-- Bottom bar -->
     <div class="bottombar">
-      <div class="bottom-left">
-        <div class="log-mini" id="logMini">aguardando...</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="pill" style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="logMini">aguardando...</div>
       </div>
-      <div class="action-row">
-        <select class="action-select" id="actionSelect">
-          <optgroup label="Mensal">
-            <option value="planejamento">Planejamento completo</option>
-            <option value="copys">Gerar copys</option>
-          </optgroup>
-          <optgroup label="Semanal">
-            <option value="artes">Artes (2 posts)</option>
-            <option value="arte1">Arte post 1</option>
-            <option value="arte2">Arte post 2</option>
-          </optgroup>
-          <optgroup label="Teste">
-            <option value="teste">1 post completo</option>
-          </optgroup>
+      <div class="bottom-pills">
+        <select style="padding:5px 24px 5px 8px;border-radius:16px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);font-family:'DM Mono',monospace;font-size:10px;outline:none;appearance:none;backdrop-filter:blur(10px);background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2710%27 height=%2710%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%239755FF%27 stroke-width=%272%27%3E%3Cpath d=%27M6 9l6 6 6-6%27/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 6px center" id="actionSelect">
+          <optgroup label="Mensal"><option value="planejamento">Planejamento</option><option value="copys">Copys</option></optgroup>
+          <optgroup label="Semanal"><option value="artes">Artes (2)</option><option value="arte1">Arte 1</option><option value="arte2">Arte 2</option></optgroup>
+          <optgroup label="Teste"><option value="teste">1 post</option></optgroup>
         </select>
-        <button class="btn-go" onclick="runAction()">▶</button>
+        <div class="pill" style="cursor:pointer;border-color:rgba(151,85,255,.4);color:#c49aff" onclick="runAction()">▶ run</div>
+      </div>
+    </div>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Checkpoint Modal -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <div class="modal-header"><span class="modal-title" id="modalTitle">Checkpoint</span></div>
-    <div class="modal-question" id="modalQuestion"></div>
-    <div class="modal-items" id="modalItems"></div>
-    <textarea class="modal-input" id="modalInput" placeholder="Sugestão de ajuste..."></textarea>
-    <div class="modal-actions">
-      <button class="modal-btn approve" onclick="respondCheckpoint(true)">Aprovar</button>
-      <button class="modal-btn adjust" onclick="respondCheckpoint(false)">Pedir ajuste</button>
-    </div>
-  </div>
-</div>
-
 <script>
-const AGENTS = ['orquestrador','estrategista','copywriter','ilustrador','designer'];
-const STATUS_CLASSES = {idle:'dg',working:'dp',done:'dg',waiting:'da',error:'dr'};
-let ws = null;
-
-function connect() {
-  const host = window.location.host || 'localhost:3737';
-  ws = new WebSocket(`ws://${host}`);
-  ws.onopen = () => {
-    document.getElementById('connDot').className = 'dot dg';
-    document.getElementById('connLabel').textContent = 'online';
-  };
-  ws.onclose = () => {
-    document.getElementById('connDot').className = 'dot dr';
-    document.getElementById('connLabel').textContent = 'offline';
-    setTimeout(connect, 3000);
-  };
-  ws.onerror = () => ws.close();
-  ws.onmessage = (evt) => {
-    const data = JSON.parse(evt.data);
-    if (data.type === 'checkpoint') showCheckpoint(data.state.checkpoint);
-    if (data.state) applyState(data.state);
-  };
+setInterval(()=>{document.getElementById('clock').textContent=new Date().toLocaleTimeString('pt-BR')},1000);
+document.getElementById('clock').textContent=new Date().toLocaleTimeString('pt-BR');
+const canvas=document.getElementById('particles'),ctx=canvas.getContext('2d');
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}resize();window.addEventListener('resize',resize);
+const pts=Array.from({length:45},()=>({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,vx:(Math.random()-.5)*.3,vy:-Math.random()*.5-.1,r:Math.random()*1.5+.3,a:Math.random()*.35+.1,c:Math.random()>.5?'124,92,252':'80,160,255'}));
+(function loop(){ctx.clearRect(0,0,canvas.width,canvas.height);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.y<0){p.y=canvas.height;p.x=Math.random()*canvas.width}if(p.x<0||p.x>canvas.width)p.x=Math.random()*canvas.width;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(${p.c},${p.a})`;ctx.fill()});requestAnimationFrame(loop)})();
+const bmap={boss:'bubble-boss',designer:'bubble-designer',copy:'bubble-copy',estrategista:'bubble-est'};
+const tmap={boss:'tag-boss',designer:'tag-holo',copy:'tag-tablet',estrategista:'tag-pointer',analista:'tag-monitors'};
+function showB(id,dur){const e=document.getElementById(id);e.classList.add('show');setTimeout(()=>e.classList.remove('show'),dur)}
+const q=[{id:'bubble-est',d:2000,dur:4000},{id:'bubble-designer',d:8000,dur:4000},{id:'bubble-copy',d:14000,dur:4000},{id:'bubble-boss',d:20000,dur:5000}];
+function loopB(){q.forEach(b=>setTimeout(()=>showB(b.id,b.dur),b.d));setTimeout(loopB,28000)}loopB();
+function focusAgent(ev,name){document.querySelectorAll('.acard').forEach(c=>c.classList.remove('active'));ev.currentTarget.classList.add('active');const t=document.getElementById(tmap[name]);if(t){t.querySelector('.tag-inner').style.cssText='border-color:#7c5cfc;box-shadow:0 0 22px #7c5cfc88;background:rgba(124,92,252,.25)';setTimeout(()=>t.querySelector('.tag-inner').style.cssText='',1500)}if(bmap[name])showB(bmap[name],3500)}
+document.querySelectorAll('.tag').forEach(t=>t.addEventListener('click',function(){const id=this.id.replace('tag-','');if(bmap[id])showB(bmap[id],3500)}));
+document.getElementById('scene').addEventListener('click',function(e){if(e.target.closest('.tag,.acard,.topbar,.bottombar,.sidepanel'))return;const r=document.createElement('div');r.className='ripple';r.style.cssText=`left:${e.clientX}px;top:${e.clientY}px`;this.appendChild(r);setTimeout(()=>r.remove(),700)});
+setInterval(()=>{['boss','designer','copy','est','ana'].forEach(id=>{const b=document.getElementById('bar-'+id);if(!b)return;let w=parseFloat(b.style.width);w=Math.max(10,Math.min(100,w+(Math.random()-.3)*3));b.style.width=w.toFixed(0)+'%'})},3000);
+// ── WebSocket ──
+const AGENT_MAP = {orquestrador:'boss',estrategista:'pointer',designer:'holo',copywriter:'tablet',ilustrador:'monitors'};
+const BUB_MAP = {orquestrador:'bubble-boss',estrategista:'bubble-est',designer:'bubble-designer',copywriter:'bubble-copy',ilustrador:'bubble-ana'};
+let ws=null;
+function wsConnect(){
+  const h=window.location.host||'localhost:3737';
+  ws=new WebSocket('ws://'+h);
+  ws.onopen=()=>{document.getElementById('connDot').className='dot dg';document.getElementById('connLabel').textContent='online'};
+  ws.onclose=()=>{document.getElementById('connDot').className='dot dr';document.getElementById('connLabel').textContent='offline';setTimeout(wsConnect,3000)};
+  ws.onerror=()=>ws.close();
+  ws.onmessage=(e)=>{const d=JSON.parse(e.data);if(d.state)applyState(d.state)};
 }
-
-function applyState(s) {
-  const labels = {idle:'idle',running:'running',checkpoint:'checkpoint',done:'done',error:'error'};
-  document.getElementById('globalStatus').textContent = labels[s.pipeline] || s.pipeline;
-
-  // Agents
-  AGENTS.forEach(name => {
-    const a = s.agents[name];
-    if (!a) return;
-    const dot = document.getElementById('dot-' + name);
-    const st = document.getElementById('status-' + name);
-    const bub = document.getElementById('bub-' + name);
-    const bubText = document.getElementById('bub-text-' + name);
-    const charEl = document.getElementById('char-' + (name === 'ilustrador' ? 'analista' : name));
-
-    if (dot) dot.className = 'dot ' + (STATUS_CLASSES[a.status] || 'dg');
-    if (st) st.textContent = a.message || a.status || 'idle';
-    if (bubText) bubText.textContent = a.message || '...';
-
-    // Show bubble when working/waiting
-    if (bub) {
-      if (a.status === 'working' || a.status === 'waiting') bub.classList.add('show');
-      else bub.classList.remove('show');
-    }
-    // Bounce when working
-    if (charEl) {
-      if (a.status === 'working') charEl.classList.add('working');
-      else charEl.classList.remove('working');
-    }
+function applyState(s){
+  const labels={idle:'idle',running:'running',checkpoint:'checkpoint',done:'done',error:'error'};
+  document.getElementById('globalStatus').textContent=labels[s.pipeline]||s.pipeline;
+  Object.keys(s.agents||{}).forEach(name=>{
+    const a=s.agents[name];if(!a)return;
+    const cid=AGENT_MAP[name];
+    const tag=document.getElementById('tag-'+(cid||name));
+    const bub=document.getElementById(BUB_MAP[name]);
+    const charEl=document.getElementById('chimp-'+(cid||name));
+    if(tag){const st=tag.querySelector('.tag-status');if(st)st.innerHTML='<span class="dot '+(a.status==='working'?'dp':a.status==='done'?'dg':a.status==='waiting'?'da':'dg')+'" style="width:5px;height:5px"></span> '+(a.message||a.status||'idle')}
+    if(bub&&a.message&&(a.status==='working'||a.status==='waiting')){showB(bub,4000,a.message,name)}
   });
-
-  // Build side panel
-  const panel = document.getElementById('sidepanel');
-  let html = '';
-  Object.keys(s.steps).forEach(num => {
-    const st = s.steps[num];
-    const names = {1:'Pesquisa',2:'Aprovação',3:'Copy',4:'Aprovação',5:'Ilustrador',6:'Designer',7:'Render'};
-    const active = st === 'active' || st === 'working' ? ' active' : '';
-    const fill = st === 'done' ? 100 : st === 'active' ? 50 : 0;
-    const color = st === 'done' ? '#22d687' : '#9755FF';
-    html += `<div class="acard${active}"><div class="acard-name">${num}. ${names[num]||'Step'}</div><div class="acard-task">${st}</div><div class="acard-bar"><div class="acard-fill" style="width:${fill}%;background:${color}"></div></div></div>`;
-  });
-  panel.innerHTML = html;
-
-  // Log
-  if (s.log && s.log.length) {
-    const last = s.log[s.log.length - 1];
-    document.getElementById('logMini').textContent = `${last.time} ${last.msg}`;
-  }
-
-  // Checkpoint
-  if (s.checkpoint && !s.checkpoint.responded) showCheckpoint(s.checkpoint);
+  if(s.log&&s.log.length){const l=s.log[s.log.length-1];document.getElementById('logMini').textContent=l.time+' '+l.msg}
 }
-
-function showCheckpoint(cp) {
-  if (!cp) return;
-  document.getElementById('modalQuestion').textContent = cp.question;
-  const items = document.getElementById('modalItems');
-  items.innerHTML = '';
-  if (cp.items && cp.items.length) {
-    cp.items.forEach(item => {
-      const d = document.createElement('div');
-      d.className = 'modal-item';
-      d.textContent = typeof item === 'string' ? item : JSON.stringify(item);
-      items.appendChild(d);
-    });
-  }
-  document.getElementById('modalInput').value = '';
-  document.getElementById('modalOverlay').classList.add('visible');
+function showB(el,dur,msg,name){
+  if(msg){const t=el.querySelector('.bubble-inner span');if(t)t.textContent=msg}
+  el.classList.add('show');setTimeout(()=>el.classList.remove('show'),dur);
 }
-
-function respondCheckpoint(approved) {
-  const feedback = document.getElementById('modalInput').value.trim();
-  if (!approved && !feedback) { document.getElementById('modalInput').focus(); return; }
-  fetch('/api/checkpoint/respond', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ approved, feedback })
-  }).then(() => document.getElementById('modalOverlay').classList.remove('visible'));
+function runAction(){
+  const cmd=document.getElementById('actionSelect').value;
+  fetch('/api/command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command:cmd})});
 }
-
-function runAction() {
-  const cmd = document.getElementById('actionSelect').value;
-  fetch('/api/command', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({command:cmd}) });
-}
-
-connect();
+wsConnect();
 </script>
 </body>
 </html>

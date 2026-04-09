@@ -1,25 +1,20 @@
 #!/usr/bin/env node
-/**
- * SalvaTech — Start
- * 
- * Sobe o dashboard + watcher em background e abre o navegador.
- * Uso: node start.js
- */
 const { spawn, exec } = require('child_process');
 const path = require('path');
 const http = require('http');
 
-const PORT = 3737;
-const DASHBOARD_DIR = path.join(__dirname, 'dashboard');
+const PORT = 3000;
+const DASHBOARD_DIR = path.join(__dirname, 'dashboard-next');
+const WATCHER_DIR = path.join(__dirname, 'dashboard');
 
 function isRunning() {
   return new Promise(resolve => {
-    const req = http.get(`http://localhost:${PORT}/api/state`, res => {
+    const req = http.get(`http://localhost:${PORT}`, res => {
       res.on('data', () => {});
       res.on('end', () => resolve(true));
     });
     req.on('error', () => resolve(false));
-    req.setTimeout(1000, () => { req.destroy(); resolve(false); });
+    req.setTimeout(2000, () => { req.destroy(); resolve(false); });
   });
 }
 
@@ -28,14 +23,14 @@ function openBrowser(url) {
   exec(cmds[process.platform] || cmds.linux);
 }
 
-function waitForServer(retries = 30) {
+function waitForServer(retries = 60) {
   return new Promise((resolve, reject) => {
     let attempts = 0;
     const check = () => {
       isRunning().then(up => {
         if (up) return resolve();
         if (++attempts >= retries) return reject(new Error('Server did not start'));
-        setTimeout(check, 200);
+        setTimeout(check, 1000);
       });
     };
     check();
@@ -50,29 +45,25 @@ async function main() {
   if (alreadyUp) {
     console.log(`  Dashboard já rodando em http://localhost:${PORT}`);
   } else {
-    console.log('  Subindo dashboard...');
-    const server = spawn('node', ['server.js'], {
-      cwd: DASHBOARD_DIR, detached: true, stdio: 'ignore'
+    console.log('  Subindo Next.js...');
+    const server = spawn('npx', ['next', 'start', '-p', String(PORT)], {
+      cwd: DASHBOARD_DIR, detached: true, stdio: 'ignore', shell: true
     });
     server.unref();
     await waitForServer();
     console.log(`  Dashboard rodando em http://localhost:${PORT}`);
   }
 
-  // Start watcher (polls for commands and runs Claude Code)
+  // Start watcher
   console.log('  Subindo watcher...');
   const watcher = spawn('node', ['watcher.js'], {
-    cwd: DASHBOARD_DIR, detached: true, stdio: 'ignore'
+    cwd: WATCHER_DIR, detached: true, stdio: 'ignore'
   });
   watcher.unref();
-  console.log('  Watcher ativo — escutando comandos do dashboard');
 
   openBrowser(`http://localhost:${PORT}`);
   console.log('  Navegador aberto.\n');
-  console.log('  Tudo pronto! Use os botões no dashboard:');
-  console.log('    "Iniciar planejamento do mês" — pesquisa + temas + copys');
-  console.log('    "Gerar artes da semana" — imagens + slides + PNGs\n');
-  console.log('  Para parar tudo: node stop.js\n');
+  console.log('  Pronto! Use os controles no dashboard.\n');
 }
 
 main().catch(e => { console.error('Erro:', e.message); process.exit(1); });
