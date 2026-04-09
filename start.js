@@ -1,10 +1,11 @@
 #!/usr/bin/env node
-const { spawn, exec } = require('child_process');
+const { spawn, execSync, exec } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 const http = require('http');
 
 const PORT = 3000;
-const DASHBOARD_DIR = path.join(__dirname, 'dashboard-next');
+const NEXT_DIR = path.join(__dirname, 'dashboard-next');
 const WATCHER_DIR = path.join(__dirname, 'dashboard');
 
 function isRunning() {
@@ -29,7 +30,7 @@ function waitForServer(retries = 60) {
     const check = () => {
       isRunning().then(up => {
         if (up) return resolve();
-        if (++attempts >= retries) return reject(new Error('Server did not start'));
+        if (++attempts >= retries) return reject(new Error('Server timeout'));
         setTimeout(check, 1000);
       });
     };
@@ -45,16 +46,23 @@ async function main() {
   if (alreadyUp) {
     console.log(`  Dashboard já rodando em http://localhost:${PORT}`);
   } else {
-    console.log('  Subindo Next.js...');
+    // Build se não tem .next/
+    const nextBuild = path.join(NEXT_DIR, '.next');
+    if (!fs.existsSync(nextBuild)) {
+      console.log('  Buildando Next.js (primeira vez)...');
+      execSync('npx next build', { cwd: NEXT_DIR, stdio: 'inherit' });
+    }
+
+    console.log('  Subindo dashboard...');
     const server = spawn('npx', ['next', 'start', '-p', String(PORT)], {
-      cwd: DASHBOARD_DIR, detached: true, stdio: 'ignore', shell: true
+      cwd: NEXT_DIR, detached: true, stdio: 'ignore', shell: true
     });
     server.unref();
     await waitForServer();
-    console.log(`  Dashboard rodando em http://localhost:${PORT}`);
+    console.log(`  Dashboard em http://localhost:${PORT}`);
   }
 
-  // Start watcher
+  // Watcher
   console.log('  Subindo watcher...');
   const watcher = spawn('node', ['watcher.js'], {
     cwd: WATCHER_DIR, detached: true, stdio: 'ignore'
@@ -62,8 +70,7 @@ async function main() {
   watcher.unref();
 
   openBrowser(`http://localhost:${PORT}`);
-  console.log('  Navegador aberto.\n');
-  console.log('  Pronto! Use os controles no dashboard.\n');
+  console.log('  Tudo pronto!\n');
 }
 
 main().catch(e => { console.error('Erro:', e.message); process.exit(1); });
