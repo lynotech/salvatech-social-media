@@ -31,27 +31,45 @@ Formato:     1080x1350px vertical portrait
 
 Imagem única com mascote + cenário integrados. O Gemini gera tudo junto — iluminação, sombras e composição naturais.
 
-Regras de composição:
+Regras de composição por estilo de capa:
+
+**Capa A** (texto no topo, mascote embaixo):
 - Personagem na metade inferior (45%-95% da altura)
 - Terço superior livre pra texto (só cenário/ambiente)
+- Instrução no prompt: `The character is positioned in the lower 55% of the frame. The upper 35% contains only environment/scenery.`
+
+**Capa B** (texto centralizado, mascote nas bordas):
+- Personagem deslocado pra lateral (esquerda ou direita) ou parcialmente visível
+- Centro da imagem com cenário que aceita texto por cima
+- Instrução no prompt: `The character is positioned to the left side of the frame, partially visible. The center of the image has open space with atmospheric environment.`
+
+**Capa C** (texto embaixo, mascote visível no topo):
+- Personagem na metade superior (10%-60% da altura)
+- Metade inferior com cenário escuro pra texto
+- Instrução no prompt: `The character is positioned in the upper half of the frame. The lower 40% has dark environment fading to near black.`
+
+Regras universais:
 - Edge-to-edge, sem bordas
 - Fundo escuro nas bordas pra integrar com #0a0414
+- Cenário conectado ao tema do post (metáfora visual)
+- Ação/postura do mascote conectada ao tema
 
 Prompt template:
 ```
 [ENQUADRAMENTO] of a chimpanzee astronaut in a plain white spacesuit,
-[ACAO_POSTURA].
-[AMBIENTE_CENARIO].
+[ACAO_POSTURA — conectada ao tema do post].
+[AMBIENTE_CENARIO — metáfora visual do tema].
 [ILUMINACAO].
 [ELEMENTO_DESTAQUE se aplicável].
 [EXPRESSAO se rosto visível].
 Photorealistic, Hasselblad medium format, 8K, cinematic color grade, deep blacks.
 No text in image. No logos on the suit — plain white only.
 Vertical portrait 1080x1350px.
-The character is positioned in the lower 55% of the frame.
-The upper 35% contains only environment/scenery.
+[INSTRUÇÃO DE POSICIONAMENTO — copiar da capa A, B ou C acima]
 Edge-to-edge, no borders. Dark edges blending to near black.
 ```
+
+O campo `COMPOSIÇÃO DE CAPA` do brief define qual estilo usar (A, B ou C). Leia o brief e use a instrução correspondente.
 
 Gerar:
 ```bash
@@ -99,6 +117,11 @@ Ex: "focused, analytical", "alarmed, eyes wide"
 ---
 
 ## Validação
+
+Antes de validar, lembre: a ação e o cenário devem estar conectados ao tema do post. Exemplos:
+- Tema "ERP obsoleto" → mascote olhando servidores antigos com luzes vermelhas
+- Tema "automação de atendimento" → mascote interagindo com telas holográficas de chat
+- Tema "checklist de software" → mascote analisando painel com checklists flutuantes
 
 - [ ] Capa: mascote integrado naturalmente no cenário?
 - [ ] Capa: terço superior livre pra texto?
