@@ -39,7 +39,7 @@ if (cur) slides.push(cur);
 
 console.log(`\n  Build Slides — ${slug} (${slides.length} slides)\n`);
 
-function slice(n) { return `../assets/slices/slice-${String(n).padStart(2,'0')}.jpg`; }
+function slice(n) { return `/posts/${slug}/assets/slices/slice-${String(n).padStart(2,'0')}.jpg`; }
 function read(f) { return fs.readFileSync(path.join(TMPL, f), 'utf-8'); }
 
 // Slide 01 — Capa

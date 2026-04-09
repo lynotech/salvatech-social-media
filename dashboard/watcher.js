@@ -12,8 +12,20 @@ const PROJECT_ROOT = path.resolve(__dirname, '..');
 const POLL_INTERVAL = 2000;
 let busy = false;
 
+// Prefixo adicionado a todos os prompts pra economizar tokens
+const SILENT_PREFIX = `REGRAS DE OUTPUT — SIGA RIGOROSAMENTE:
+- NAO explique o que vai fazer antes de fazer. Apenas FACA.
+- NAO descreva seus passos. NAO fale "vou agora...", "primeiro vou...", "deixa eu...".
+- NAO repita instrucoes que recebeu. NAO resuma o plano.
+- NAO faca comentarios sobre o processo. NAO diga "pronto, agora vou...".
+- Responda APENAS quando precisar mostrar um resultado ao usuario (ex: lista de temas pra aprovar).
+- Fora isso, execute os comandos em SILENCIO. Cada palavra que voce escreve custa dinheiro.
+- Seja EXTREMAMENTE conciso. Zero fluff. Zero narração.
+
+`;
+
 const PROMPTS = {
-  planejamento: `Voce é o Orquestrador da SalvaTech. Execute o planejamento mensal AGORA, sem perguntar nada.
+  planejamento: SILENT_PREFIX + `Voce é o Orquestrador da SalvaTech. Execute o planejamento mensal AGORA, sem perguntar nada.
 
 PASSO 1 — Notifique o dashboard:
 node dashboard/notify.js '{"pipeline":"running","step":1,"stepStatus":"active","agent":"estrategista","status":"working","message":"Pesquisando tendencias...","log":"Estrategista iniciou","logType":"agent"}'
@@ -48,7 +60,7 @@ Aguarde resposta. Se approved=false, ajuste conforme o feedback.
 
 EXECUTE TUDO SEM PERGUNTAR. Comece agora.`,
 
-  copys: `Voce é o Orquestrador da SalvaTech. Os temas ja foram definidos e aprovados. Gere APENAS os copys e legendas AGORA, sem pesquisar temas novos.
+  copys: SILENT_PREFIX + `Voce é o Orquestrador da SalvaTech. Os temas ja foram definidos e aprovados. Gere APENAS os copys e legendas AGORA, sem pesquisar temas novos.
 
 PASSO 1 — Notifique o dashboard:
 node dashboard/notify.js '{"pipeline":"running","step":1,"stepStatus":"done","step":2,"stepStatus":"done"}'
@@ -75,7 +87,7 @@ node dashboard/notify.js '{"pipeline":"done","agent":"orquestrador","status":"do
 
 EXECUTE TUDO SEM PERGUNTAR. NAO pesquise temas. NAO mude briefs. Comece agora.`,
 
-  artes: `Voce é o Orquestrador da SalvaTech. Gere as artes da semana AGORA, sem perguntar nada.
+  artes: SILENT_PREFIX + `Voce é o Orquestrador da SalvaTech. Gere as artes da semana AGORA, sem perguntar nada.
 
 PASSO 1 — Identifique os 2 posts da semana atual em posts/ que ja tem brief.md e copy.md
 
@@ -102,9 +114,47 @@ node dashboard/notify.js '{"pipeline":"done","agent":"orquestrador","status":"do
 
 EXECUTE TUDO SEM PERGUNTAR. Comece agora.`,
 
-  arte1: `Voce é o Orquestrador da SalvaTech. Gere a arte APENAS do PRIMEIRO post da semana atual. Identifique o post com a data mais proxima em posts/ que tenha copy.md mas NAO tenha assets/slices/. Execute o mesmo fluxo do Ilustrador (mascote + panorama + compose + build-slides + render PNGs) apenas para esse post. Use node dashboard/notify.js para atualizar o dashboard. EXECUTE SEM PERGUNTAR.`,
+  arte1: SILENT_PREFIX + `Voce é o Orquestrador da SalvaTech. Gere a arte APENAS do PRIMEIRO post da semana atual. Identifique o post com a data mais proxima em posts/ que tenha copy.md mas NAO tenha assets/slices/. Execute o mesmo fluxo do Ilustrador (mascote + panorama + compose + build-slides + render PNGs) apenas para esse post. Use node dashboard/notify.js para atualizar o dashboard. EXECUTE SEM PERGUNTAR.`,
 
-  arte2: `Voce é o Orquestrador da SalvaTech. Gere a arte APENAS do SEGUNDO post da semana atual. Identifique o segundo post com a data mais proxima em posts/ que tenha copy.md mas NAO tenha assets/slices/. Execute o mesmo fluxo do Ilustrador (mascote + panorama + compose + build-slides + render PNGs) apenas para esse post. Use node dashboard/notify.js para atualizar o dashboard. EXECUTE SEM PERGUNTAR.`
+  arte2: SILENT_PREFIX + `Voce é o Orquestrador da SalvaTech. Gere a arte APENAS do SEGUNDO post da semana atual. Identifique o segundo post com a data mais proxima em posts/ que tenha copy.md mas NAO tenha assets/slices/. Execute o mesmo fluxo do Ilustrador (mascote + panorama + compose + build-slides + render PNGs) apenas para esse post. Use node dashboard/notify.js para atualizar o dashboard. EXECUTE SEM PERGUNTAR.`,
+
+  teste: SILENT_PREFIX + `Voce é o Orquestrador da SalvaTech. Execute o fluxo COMPLETO para 1 UNICO post de teste. Faca TUDO sem perguntar:
+
+PASSO 1 — ESTRATEGISTA (1 tema):
+node dashboard/notify.js '{"pipeline":"running","step":1,"stepStatus":"active","agent":"estrategista","status":"working","message":"Pesquisando...","log":"Teste: Estrategista iniciou","logType":"agent"}'
+- Leia agents/estrategista.agent.md e pipeline/steps/01-estrategista.md
+- Pesquise 1 tendencia relevante com apify (ou use conhecimento proprio se apify nao disponivel)
+- Defina 1 tema, crie a pasta posts/{slug}/ com brief.md
+- Notifique conclusao
+
+PASSO 2 — COPYWRITER (1 copy):
+node dashboard/notify.js '{"step":3,"stepStatus":"active","agent":"copywriter","status":"working","message":"Escrevendo copy...","log":"Teste: Copywriter iniciou","logType":"agent"}'
+- Leia agents/copywriter.agent.md — formato de 4 slides panoramicos
+- Gere copy.md e legenda.md para esse post
+- Notifique conclusao
+
+PASSO 3 — ILUSTRADOR (1 arte):
+node dashboard/notify.js '{"step":5,"stepStatus":"active","agent":"ilustrador","status":"working","message":"Gerando arte...","log":"Teste: Ilustrador iniciou","logType":"agent"}'
+- Leia agents/ilustrador.agent.md
+- Gere mascote.png (fundo escuro, sem logo, traje branco liso):
+  python skills/image-ai-generator/scripts/generate.py --prompt "PROMPT" --output "posts/{slug}/assets/mascote.png" --mode production
+- Gere panorama-bg.jpg (ultra-wide, sem personagem):
+  python skills/image-ai-generator/scripts/generate.py --prompt "PROMPT" --output "posts/{slug}/assets/panorama-bg.jpg" --mode production
+- Componha e fatie:
+  python pipeline/compose-panorama.py --background "posts/{slug}/assets/panorama-bg.jpg" --character "posts/{slug}/assets/mascote.png" --output-dir "posts/{slug}/assets/slices" --slides 4 --char-position 0 --char-scale 0.85
+
+PASSO 4 — DESIGNER (slides HTML):
+node dashboard/notify.js '{"step":6,"stepStatus":"active","agent":"designer","status":"working","message":"Montando slides...","log":"Teste: Designer iniciou","logType":"agent"}'
+node pipeline/build-slides.js --slug {SLUG}
+
+PASSO 5 — RENDERIZADOR (PNGs):
+node dashboard/notify.js '{"step":7,"stepStatus":"active","agent":"designer","status":"working","message":"Renderizando...","log":"Teste: Renderizador iniciou","logType":"agent"}'
+- Renderize os 4 slides HTML em PNG via playwright
+
+PASSO 6 — FINALIZAR:
+node dashboard/notify.js '{"pipeline":"done","agent":"orquestrador","status":"done","message":"Teste concluido!","log":"Teste: 1 post completo gerado","logType":"ok"}'
+
+EXECUTE TUDO SEM PERGUNTAR. Comece agora.`
 };
 
 function pollCommand() {
