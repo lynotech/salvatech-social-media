@@ -87,74 +87,25 @@ node dashboard/notify.js '{"pipeline":"done","agent":"orquestrador","status":"do
 
 EXECUTE TUDO SEM PERGUNTAR. NAO pesquise temas. NAO mude briefs. Comece agora.`,
 
-  artes: SILENT_PREFIX + `Voce é o Orquestrador da SalvaTech. Gere as artes da semana AGORA, sem perguntar nada.
+  artes: SILENT_PREFIX + `Voce é o Orquestrador. Gere as artes da semana. Para cada post em posts/ que tenha copy.md mas NAO tenha assets/capa.jpg:
+1. Leia agents/ilustrador.agent.md
+2. Gere capa.jpg (mascote + cenario juntos): python skills/image-ai-generator/scripts/generate.py --prompt "PROMPT" --output "posts/{slug}/assets/capa.jpg" --mode production
+3. Gere background.jpg (cenario escuro sem personagem): python skills/image-ai-generator/scripts/generate.py --prompt "Dark cinematic environment... No characters, no text. Vertical 1080x1350px." --output "posts/{slug}/assets/background.jpg" --mode production
+4. Monte slides: node pipeline/build-slides.js --slug {SLUG}
+5. Renderize PNGs: suba http server na raiz (python -m http.server 8765 --directory .) e use playwright pra cada slide
+Use node dashboard/notify.js pra atualizar status. EXECUTE SEM PERGUNTAR.`,
 
-PASSO 1 — Identifique os 2 posts da semana atual em posts/ que ja tem brief.md e copy.md
+  arte1: SILENT_PREFIX + `Gere a arte do PRIMEIRO post em posts/ que tenha copy.md mas NAO tenha assets/capa.jpg. Siga: gere capa.jpg + background.jpg com --mode production, rode node pipeline/build-slides.js, renderize PNGs. Use notify.js. EXECUTE SEM PERGUNTAR.`,
 
-PASSO 2 — Para cada post, execute o Ilustrador (carrossel panoramico):
-node dashboard/notify.js '{"pipeline":"running","step":5,"stepStatus":"active","agent":"ilustrador","status":"working","message":"Gerando arte...","log":"Ilustrador iniciou","logType":"agent"}'
-- Leia pipeline/steps/05-ilustrador.md e agents/ilustrador.agent.md
-- Gere o MASCOTE (fundo escuro solido, sem cenario):
-  python skills/image-ai-generator/scripts/generate.py --prompt "PROMPT_MASCOTE_AQUI" --output "posts/{slug}/assets/mascote.png" --mode production
-- Gere o CENARIO PANORAMICO (ultra-wide, sem personagem):
-  python skills/image-ai-generator/scripts/generate.py --prompt "PROMPT_CENARIO_AQUI" --output "posts/{slug}/assets/panorama-bg.jpg" --mode production
-- COMPONHA e FATIE:
-  python pipeline/compose-panorama.py --background "posts/{slug}/assets/panorama-bg.jpg" --character "posts/{slug}/assets/mascote.png" --output-dir "posts/{slug}/assets/slices" --slides 4 --char-position 0 --char-scale 0.85
+  arte2: SILENT_PREFIX + `Gere a arte do SEGUNDO post em posts/ que tenha copy.md mas NAO tenha assets/capa.jpg. Mesmo fluxo. EXECUTE SEM PERGUNTAR.`,
 
-PASSO 3 — Monte os slides HTML:
-node dashboard/notify.js '{"step":6,"stepStatus":"active","agent":"designer","status":"working","message":"Montando slides...","log":"Designer iniciou","logType":"agent"}'
-node pipeline/build-slides.js --slug {SLUG}
-
-PASSO 4 — Renderize os PNGs:
-node dashboard/notify.js '{"step":7,"stepStatus":"active","agent":"designer","status":"working","message":"Renderizando PNGs...","log":"Renderizador iniciou","logType":"agent"}'
-- Use playwright para renderizar cada slide HTML em PNG
-
-PASSO 5 — Finalize:
-node dashboard/notify.js '{"pipeline":"done","agent":"orquestrador","status":"done","message":"Artes prontas!","log":"Artes da semana concluidas","logType":"ok"}'
-
-EXECUTE TUDO SEM PERGUNTAR. Comece agora.`,
-
-  arte1: SILENT_PREFIX + `Voce é o Orquestrador da SalvaTech. Gere a arte APENAS do PRIMEIRO post da semana atual. Identifique o post com a data mais proxima em posts/ que tenha copy.md mas NAO tenha assets/slices/. Execute o mesmo fluxo do Ilustrador (mascote + panorama + compose + build-slides + render PNGs) apenas para esse post. Use node dashboard/notify.js para atualizar o dashboard. EXECUTE SEM PERGUNTAR.`,
-
-  arte2: SILENT_PREFIX + `Voce é o Orquestrador da SalvaTech. Gere a arte APENAS do SEGUNDO post da semana atual. Identifique o segundo post com a data mais proxima em posts/ que tenha copy.md mas NAO tenha assets/slices/. Execute o mesmo fluxo do Ilustrador (mascote + panorama + compose + build-slides + render PNGs) apenas para esse post. Use node dashboard/notify.js para atualizar o dashboard. EXECUTE SEM PERGUNTAR.`,
-
-  teste: SILENT_PREFIX + `Voce é o Orquestrador da SalvaTech. Execute o fluxo COMPLETO para 1 UNICO post de teste. Faca TUDO sem perguntar:
-
-PASSO 1 — ESTRATEGISTA (1 tema):
-node dashboard/notify.js '{"pipeline":"running","step":1,"stepStatus":"active","agent":"estrategista","status":"working","message":"Pesquisando...","log":"Teste: Estrategista iniciou","logType":"agent"}'
-- Leia agents/estrategista.agent.md e pipeline/steps/01-estrategista.md
-- Pesquise 1 tendencia relevante com apify (ou use conhecimento proprio se apify nao disponivel)
-- Defina 1 tema, crie a pasta posts/{slug}/ com brief.md
-- Notifique conclusao
-
-PASSO 2 — COPYWRITER (1 copy):
-node dashboard/notify.js '{"step":3,"stepStatus":"active","agent":"copywriter","status":"working","message":"Escrevendo copy...","log":"Teste: Copywriter iniciou","logType":"agent"}'
-- Leia agents/copywriter.agent.md — formato de 4 slides panoramicos
-- Gere copy.md e legenda.md para esse post
-- Notifique conclusao
-
-PASSO 3 — ILUSTRADOR (1 arte):
-node dashboard/notify.js '{"step":5,"stepStatus":"active","agent":"ilustrador","status":"working","message":"Gerando arte...","log":"Teste: Ilustrador iniciou","logType":"agent"}'
-- Leia agents/ilustrador.agent.md
-- Gere mascote.png (fundo escuro, sem logo, traje branco liso):
-  python skills/image-ai-generator/scripts/generate.py --prompt "PROMPT" --output "posts/{slug}/assets/mascote.png" --mode production
-- Gere panorama-bg.jpg (ultra-wide, sem personagem):
-  python skills/image-ai-generator/scripts/generate.py --prompt "PROMPT" --output "posts/{slug}/assets/panorama-bg.jpg" --mode production
-- Componha e fatie:
-  python pipeline/compose-panorama.py --background "posts/{slug}/assets/panorama-bg.jpg" --character "posts/{slug}/assets/mascote.png" --output-dir "posts/{slug}/assets/slices" --slides 4 --char-position 0 --char-scale 0.85
-
-PASSO 4 — DESIGNER (slides HTML):
-node dashboard/notify.js '{"step":6,"stepStatus":"active","agent":"designer","status":"working","message":"Montando slides...","log":"Teste: Designer iniciou","logType":"agent"}'
-node pipeline/build-slides.js --slug {SLUG}
-
-PASSO 5 — RENDERIZADOR (PNGs):
-node dashboard/notify.js '{"step":7,"stepStatus":"active","agent":"designer","status":"working","message":"Renderizando...","log":"Teste: Renderizador iniciou","logType":"agent"}'
-- Renderize os 4 slides HTML em PNG via playwright
-
-PASSO 6 — FINALIZAR:
-node dashboard/notify.js '{"pipeline":"done","agent":"orquestrador","status":"done","message":"Teste concluido!","log":"Teste: 1 post completo gerado","logType":"ok"}'
-
-EXECUTE TUDO SEM PERGUNTAR. Comece agora.`
+  teste: SILENT_PREFIX + `Execute o fluxo COMPLETO para 1 post de teste:
+1. ESTRATEGISTA: defina 1 tema, crie posts/{slug}/brief.md
+2. COPYWRITER: gere copy.md (4 slides) e legenda.md seguindo agents/copywriter.agent.md
+3. ILUSTRADOR: gere capa.jpg (mascote+cenario juntos, --mode production) e background.jpg (cenario escuro, --mode production) seguindo agents/ilustrador.agent.md
+4. DESIGNER: node pipeline/build-slides.js --slug {SLUG}
+5. RENDERIZADOR: suba http server na raiz (python -m http.server 8765 --directory .) e renderize os 4 slides em PNG com playwright (viewport 1080x1350)
+Use node dashboard/notify.js pra atualizar status a cada passo. EXECUTE TUDO SEM PERGUNTAR.`
 };
 
 function pollCommand() {
