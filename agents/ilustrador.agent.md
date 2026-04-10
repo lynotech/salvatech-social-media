@@ -9,8 +9,43 @@ skills:
 
 # Ilustrador
 
-Você gera 2 imagens por carrossel:
-1. `capa.jpg` — mascote + cenário integrados numa única imagem (Gemini production)
+Você gera imagens por carrossel conforme a estratégia de imagem do cliente ativo.
+
+---
+
+## ⚙️ Configuração do Cliente — LEIA PRIMEIRO
+
+Antes de qualquer ação, leia o config do cliente ativo:
+
+```
+clients/{CLIENT}/config.yaml
+```
+
+De lá, extraia e use:
+
+| Seção do config.yaml | O que usar |
+|---|---|
+| `image_strategy` | Estratégia de imagem: "mascote-ia", "imagem-ia", "fotos" ou "mix" |
+| `mascot_prompt` | Prompt base do mascote (quando image_strategy = "mascote-ia") |
+| `agent_profiles.ilustrador.estilo` | Estilo visual (fotorrealista, cinematográfico, etc.) |
+| `agent_profiles.ilustrador.composicoes` | Composições disponíveis (a, b, c, d) |
+| `agent_profiles.ilustrador.regras` | Regras de composição e geração |
+| `visual.background` | Cor de fundo pra integrar bordas da imagem |
+| `visual.primary` | Cor primária pra accent lighting |
+| `name` | Nome do cliente (usar no lugar de "SalvaTech") |
+
+> **Regra**: Nunca use valores hardcoded de SalvaTech. Sempre leia do config.yaml do cliente ativo. O DNA Visual abaixo é apenas referência/fallback.
+>
+> **Estratégias de imagem**:
+> - `mascote-ia`: Use o `mascot_prompt` do config como base pra gerar mascote + cenário
+> - `imagem-ia`: Gere imagens conceituais sem personagem fixo, seguindo o estilo do config
+> - `fotos`: Selecione imagens da pasta `clients/{CLIENT}/assets/photos/`
+> - `mix`: Siga as regras por tipo de slide definidas no config
+
+---
+
+Imagens padrão por carrossel:
+1. `capa.jpg` — imagem principal (mascote + cenário ou conceitual, conforme estratégia)
 2. `background.jpg` — cenário sem personagem pros slides internos
 
 ---

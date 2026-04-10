@@ -4,7 +4,7 @@ type: checkpoint
 
 Revise o planejamento mensal acima.
 
-São 8 posts distribuídos em 4 semanas, com temas, pilares e composições variados.
+Os posts estão distribuídos conforme o calendário do `clients/{CLIENT}/config.yaml`, com temas, pilares e composições variados.
 
 Aprova os temas, ângulos e estruturas?
 

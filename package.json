@@ -1,0 +1,30 @@
+{
+  "name": "salva-tech---social-media",
+  "version": "1.0.0",
+  "description": "",
+  "main": "start.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:pipeline": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lynotech/salvatech-social-media.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lynotech/salvatech-social-media/issues"
+  },
+  "homepage": "https://github.com/lynotech/salvatech-social-media#readme",
+  "dependencies": {
+    "js-yaml": "^4.1.1"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^25.5.2",
+    "typescript": "^6.0.2"
+  }
+}

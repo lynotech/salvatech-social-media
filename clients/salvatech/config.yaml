@@ -1,0 +1,105 @@
+# SalvaTech — Client Configuration
+# Migrado de CLAUDE.md e agents/*.agent.md
+
+name: "SalvaTech"
+slug: "salvatech"
+
+# Identidade Visual (extraída de CLAUDE.md e designer.agent.md)
+visual:
+  background: "#0a0414"
+  primary: "#9755FF"
+  secondary: "#c49aff"
+  highlight: "#e94560"
+  text: "#ffffff"
+  muted: "#9980cc"
+  headline_font: "Black Han Sans"
+  body_font: "Inter"
+  logo: "assets/logo.png"
+
+# Estratégia de Imagem (extraída de ilustrador.agent.md)
+image_strategy: "mascote-ia"
+mascot_prompt: |
+  Chimpanzee astronaut in a plain white spacesuit (no logos, no patches).
+  Photorealistic, Hasselblad medium format, 8K, cinematic color grade, deep blacks.
+  No text in image. No real logos.
+
+# Canais (extraídos de CLAUDE.md)
+channels:
+  - instagram
+  - linkedin
+  - tiktok
+
+# Calendário (extraído de CLAUDE.md — 8 posts/mês, 2 por semana)
+schedule:
+  posts_per_month: 8
+  weeks:
+    - { day: "quarta", channel: "instagram" }
+    - { day: "sexta", channel: "instagram" }
+    - { day: "segunda", channel: "linkedin" }
+    - { day: "quarta", channel: "instagram" }
+    - { day: "quarta", channel: "instagram" }
+    - { day: "sexta", channel: "instagram" }
+    - { day: "segunda", channel: "linkedin" }
+    - { day: "quarta", channel: "instagram" }
+
+# Pilares de Conteúdo (extraídos de estrategista.agent.md)
+pillars:
+  - name: "Autoridade"
+    description: "Tendências tech, erros comuns, análises do mercado"
+    channels: ["linkedin", "instagram"]
+  - name: "Valor Prático"
+    description: "Dicas aplicáveis, ferramentas, checklists, tutoriais rápidos"
+    channels: ["instagram", "tiktok"]
+  - name: "Bastidores"
+    description: "Como a SalvaTech trabalha, uso de IA, processo interno"
+    channels: ["instagram", "tiktok"]
+  - name: "Provocação"
+    description: "Perguntas que geram debate, dados surpreendentes, mitos"
+    channels: ["instagram", "linkedin"]
+  - name: "Prova Social"
+    description: "Resultados, cases, depoimentos (1x por mês)"
+    channels: ["instagram", "linkedin"]
+
+# Público-alvo (extraído de estrategista.agent.md)
+audience: "Empresários, gestores e fundadores de PMEs brasileiras"
+
+# Tópicos de Pesquisa (extraídos de estrategista.agent.md)
+research_topics:
+  - "tendências IA PME Brasil"
+  - "automação empresas brasileiras"
+  - "software gestão empresarial"
+  - "problemas sistema empresarial brasil"
+  - "inteligência artificial negócios brasil"
+  - "automação digital PME"
+
+# Perfis dos Agentes (extraídos dos agents/*.agent.md)
+agent_profiles:
+  estrategista:
+    fontes: ["google trends", "linkedin BR", "portais tech", "google news"]
+    tipo_temas: "tecnologia, IA, automação para PMEs"
+    prioridade: "dados recentes, tendências da semana"
+
+  copywriter:
+    tom: "dev sênior explicando pro CEO — técnico mas acessível"
+    slides: 4
+    estrutura: "gancho → problema → solução → CTA"
+    regras:
+      - "máximo 15 palavras por slide"
+      - "não usar travessão"
+      - "ZONA_SUB máx 8 palavras"
+      - "arco narrativo em 4 atos"
+
+  ilustrador:
+    estilo: "fotorrealista, cinematográfico, dark, Hasselblad 8K"
+    composicoes: ["a", "b", "c", "d"]
+    regras:
+      - "mascote na metade inferior pra capa A"
+      - "edge-to-edge, sem bordas"
+      - "fundo escuro nas bordas pra integrar com background"
+      - "sem texto nas imagens"
+      - "sem logos no traje — plain white only"
+
+  designer:
+    templates: ["capa-a", "capa-b", "capa-c", "slide-i1", "slide-i2", "slide-cta"]
+    rodape: "logo + numeração"
+    efeitos: ["glow radial roxo", "gradient overlay", "thin divider"]

@@ -1,8 +1,8 @@
 ---
 agent: ilustrador
 execution: inline
-inputFile: posts/{slug}/brief.md
-outputFile: posts/{slug}/assets/capa.jpg
+inputFile: clients/{CLIENT}/posts/{slug}/brief.md
+outputFile: clients/{CLIENT}/posts/{slug}/assets/capa.jpg
 model_tier: standard
 skills:
   - image-ai-generator
@@ -10,32 +10,41 @@ skills:
 
 # Geração de Imagens
 
-Gere 2 imagens por post usando Gemini production:
+Leia o config do cliente ativo em `clients/{CLIENT}/config.yaml` antes de começar.
+Use os campos `image_strategy`, `mascot_prompt`, `visual`, e `agent_profiles.ilustrador` do config.
 
-## 1. Capa (capa.jpg) — mascote + cenário integrados
+Gere imagens conforme a estratégia de imagem do cliente (`image_strategy`):
+- `mascote-ia`: Use o `mascot_prompt` do config como base
+- `imagem-ia`: Gere imagens conceituais seguindo o estilo do config
+- `fotos`: Selecione de `clients/{CLIENT}/assets/photos/`
+- `mix`: Siga regras por tipo de slide do config
+
+## 1. Capa (capa.jpg) — imagem principal
 
 ```bash
 python skills/image-ai-generator/scripts/generate.py \
   --prompt "{PROMPT_COMPLETO}" \
-  --output "posts/{slug}/assets/capa.jpg" \
+  --output "clients/{CLIENT}/posts/{slug}/assets/capa.jpg" \
   --mode production
 ```
 
-Regras: mascote na metade inferior, terço superior livre, edge-to-edge, sem logos, sem texto.
+Regras: leia `agent_profiles.ilustrador.regras` do config. Integre bordas com a cor `visual.background` do config.
 
 ## 2. Background (background.jpg) — cenário sem personagem
 
 ```bash
 python skills/image-ai-generator/scripts/generate.py \
-  --prompt "Dark cinematic environment, {CENARIO}. Deep black near #0a0414. Violet and cold blue accents. Very dark, for white text overlay. No characters, no text. Photorealistic, 8K. Vertical 1080x1350px." \
-  --output "posts/{slug}/assets/background.jpg" \
+  --prompt "Dark cinematic environment, {CENARIO}. Deep black near {BACKGROUND_COLOR}. {PRIMARY_COLOR} and cold blue accents. Very dark, for white text overlay. No characters, no text. Photorealistic, 8K. Vertical 1080x1350px." \
+  --output "clients/{CLIENT}/posts/{slug}/assets/background.jpg" \
   --mode production
 ```
+
+> Substitua `{BACKGROUND_COLOR}` e `{PRIMARY_COLOR}` pelos valores de `visual.background` e `visual.primary` do config.yaml.
 
 ## Output
 
 ```
-posts/{slug}/assets/
-├── capa.jpg        ← mascote + cenário (slide 1)
-└── background.jpg  ← cenário escuro (slides 2-4)
+clients/{CLIENT}/posts/{slug}/assets/
+├── capa.jpg        ← imagem principal (slide 1)
+└── background.jpg  ← cenário escuro (slides internos)
 ```

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&family=Syne:wght@800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1080px; height: 1350px; overflow: hidden; background: #0a0414; }
+  .canvas { position: relative; width: 1080px; height: 1350px; overflow: hidden; }
+
+  .bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+  .overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(10,4,20,0.65); z-index: 1;
+  }
+  .glow {
+    position: absolute; top: 35%; left: 50%; transform: translate(-50%,-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(ellipse, rgba(151,85,255,0.12) 0%, transparent 70%);
+    z-index: 2;
+  }
+
+  .conteudo {
+    position: relative; z-index: 3; padding: 80px 64px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    height: 100%; text-align: center;
+  }
+  .headline {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 80px; line-height: 0.92; text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+  .headline .l1 { color: #fff; display: block; text-shadow: 0 4px 40px rgba(0,0,0,0.5); }
+  .headline .l2 { color: #9755FF; display: block; text-shadow: 0 4px 40px rgba(151,85,255,0.3); }
+  .body-text {
+    font-family: 'Outfit', sans-serif; font-size: 28px; line-height: 1.4;
+    color: #c4b5e0; margin-bottom: 48px; max-width: 750px; font-weight: 300;
+  }
+  .cta-btn {
+    display: inline-block; padding: 24px 60px;
+    background: linear-gradient(135deg, #9755FF, #7a3de8);
+    border-radius: 16px; font-family: 'Syne', sans-serif;
+    font-size: 26px; font-weight: 800; color: #fff;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    box-shadow: 0 8px 32px rgba(151,85,255,0.3), 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .rodape {
+    position: absolute; bottom: 0; width: 100%; height: 72px; z-index: 4;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(10,4,20,0.92);
+  }
+  .rodape .logo { height: 36px; width: auto; }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <img class="bg" src="/clients/salvatech/posts/2026-04-09-pme-falham-digitalizacao/assets/background.jpg" alt="">
+  <div class="overlay"></div>
+  <div class="glow"></div>
+  <div class="conteudo">
+    <div class="headline">
+      <span class="l1">PARE DE COMPRAR</span>
+      <span class="l2">SEM TER UM PLANO</span>
+    </div>
+    <div class="body-text">Mapeamos seu processo gratuitamente antes de sugerir qualquer sistema.</div>
+    <div class="cta-btn">LINK NA BIO</div>
+  </div>
+  <div class="rodape">
+    <img class="logo" src="/clients/salvatech/assets/logo.png" alt="SalvaTech">
+  </div>
+</div>
+</body>
+</html>

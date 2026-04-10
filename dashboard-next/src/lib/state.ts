@@ -13,6 +13,8 @@ export interface CheckpointData {
   agent: string;
   question: string;
   items: string[];
+  type?: 'approval' | 'text' | 'choice';
+  options?: string[];
   responded: boolean;
   response: { approved: boolean; feedback: string } | null;
 }

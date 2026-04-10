@@ -2,76 +2,117 @@
 
 import { AppState } from '@/lib/state';
 
-const AGENT_MAP: Record<string, { label: string; role: string; charId: string; tagPos: string; bubPos: string }> = {
-  orquestrador: { label: 'Orquestrador', role: 'coordenação', charId: 'boss', tagPos: 'bottom-[58%] left-[32%]', bubPos: 'bottom-[64%] left-[32%]' },
-  estrategista: { label: 'Estrategista', role: 'pesquisa · temas', charId: 'estrategista', tagPos: 'bottom-[54%] left-[3%]', bubPos: 'bottom-[60%] left-[3%]' },
-  designer: { label: 'Designer', role: 'slides · render', charId: 'Designer', tagPos: 'bottom-[54%] left-[44%]', bubPos: 'bottom-[60%] left-[44%]' },
-  copywriter: { label: 'Copywriter', role: 'copy · legendas', charId: 'copywriter', tagPos: 'bottom-[54%] right-[23%]', bubPos: 'bottom-[60%] right-[23%]' },
-  ilustrador: { label: 'Ilustrador', role: 'imagens · arte', charId: 'analista', tagPos: 'bottom-[52%] right-[3%]', bubPos: 'bottom-[58%] right-[3%]' },
+// Mapeamento: nosso agente → imagem do personagem + posição da tag (do agentroom original)
+const AGENTS: Record<string, { label: string; role: string; img: string; tagPos: React.CSSProperties; bubPos: React.CSSProperties; anim: string }> = {
+  orquestrador: { label: 'Craudin The Boss', role: 'Orquestrador', img: 'boss.png',
+    tagPos: { bottom: '32%', left: '34%' }, bubPos: { bottom: '38%', left: '34%' },
+    anim: 'bs 4s ease-in-out infinite' },
+  estrategista: { label: 'Kako', role: 'Estrategista', img: 'estrategista.png',
+    tagPos: { top: '18%', left: '4%' }, bubPos: { top: '12%', left: '4%' },
+    anim: 'sw 5s ease-in-out infinite' },
+  designer: { label: 'Jorge Macaco', role: 'Designer', img: 'Designer.png',
+    tagPos: { top: '14%', left: '42%' }, bubPos: { top: '8%', left: '42%' },
+    anim: 'fl 3.5s ease-in-out infinite' },
+  copywriter: { label: 'Menor', role: 'Copywriter', img: 'copywriter.png',
+    tagPos: { top: '20%', right: '28%' }, bubPos: { top: '14%', right: '28%' },
+    anim: 'tl 6s ease-in-out infinite' },
+  ilustrador: { label: 'Wildson', role: 'Ilustrador', img: 'analista.png',
+    tagPos: { top: '30%', right: '15%' }, bubPos: { top: '24%', right: '15%' },
+    anim: 'bf 3s ease-in-out infinite' },
 };
 
-const STATUS_DOT: Record<string, string> = {
-  idle: 'bg-emerald-500 shadow-[0_0_8px_#22d687]',
-  working: 'bg-purple-500 shadow-[0_0_8px_#9755FF] animate-pulse',
-  done: 'bg-emerald-500 shadow-[0_0_8px_#22d687]',
-  waiting: 'bg-amber-500 shadow-[0_0_8px_#f5a623]',
-  error: 'bg-red-500 shadow-[0_0_8px_#e94560]',
+const DOT_STYLES: Record<string, React.CSSProperties> = {
+  idle: { background: '#555', boxShadow: 'none' },
+  working: { background: '#9755FF', boxShadow: '0 0 8px #9755FF', animation: 'dotPulse 1.5s infinite' },
+  done: { background: '#22d687', boxShadow: '0 0 8px #22d687' },
+  waiting: { background: '#f5a623', boxShadow: '0 0 8px #f5a623', animation: 'dotPulse 2s infinite' },
+  error: { background: '#e94560', boxShadow: '0 0 8px #e94560' },
 };
 
 export default function AgentRoom({ state }: { state: AppState }) {
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+      <style>{`
+        @keyframes bs{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+        @keyframes sw{0%,100%{transform:translateX(0) rotate(0deg)}33%{transform:translateX(-3px) rotate(-.5deg)}66%{transform:translateX(3px) rotate(.5deg)}}
+        @keyframes fl{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.01)}}
+        @keyframes tl{0%,100%{transform:rotate(0deg) translateY(0)}25%{transform:rotate(.8deg) translateY(-2px)}75%{transform:rotate(-.8deg) translateY(-4px)}}
+        @keyframes bf{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+        @keyframes hdp{0%,100%{opacity:.85;filter:brightness(1)}50%{opacity:1;filter:brightness(1.25)}}
+        @keyframes dotPulse{0%,100%{opacity:1}50%{opacity:.4}}
+        @keyframes glowPulse{0%,100%{filter:drop-shadow(0 0 6px rgba(151,85,255,0.3))}50%{filter:drop-shadow(0 0 18px rgba(151,85,255,0.7))}}
+      `}</style>
+
       {/* Background */}
-      <img src="/personagens/bgescritorio.png" alt="" className="absolute inset-0 w-full h-full object-cover z-[1]" />
+      <img src="/personagens/bgescritorio.png" alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 1 }} />
 
-      {/* Mesa */}
-      <img src="/personagens/mesacentral.png" alt="" className="absolute inset-0 w-full h-full object-cover z-[4]" />
+      {/* Mesa central com holo glow */}
+      <img src="/personagens/mesacentral.png" alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 4, animation: 'hdp 2.5s ease-in-out infinite' }} />
 
-      {/* Characters — all same size layers */}
-      {Object.entries(AGENT_MAP).map(([name, cfg]) => {
+      {/* Characters — each as full-size layer with animation */}
+      {Object.entries(AGENTS).map(([name, cfg], i) => {
         const a = state.agents[name];
         const isWorking = a?.status === 'working';
         return (
           <img
             key={name}
-            src={`/personagens/${cfg.charId}.png`}
+            src={`/personagens/${cfg.img}`}
             alt=""
-            className={`absolute inset-0 w-full h-full object-cover z-[6] transition-all duration-300 ${isWorking ? 'drop-shadow-[0_0_12px_rgba(151,85,255,0.6)]' : ''}`}
+            style={{
+              position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
+              zIndex: 5 + i,
+              animation: cfg.anim,
+              filter: isWorking ? undefined : undefined,
+              ...(isWorking ? { animation: `${cfg.anim}, glowPulse 1.5s ease-in-out infinite` } : {})
+            }}
           />
         );
       })}
 
-      {/* Effects */}
-      <div className="absolute inset-0 z-[8] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.5) 100%)' }} />
-      <div className="absolute inset-0 z-[10] pointer-events-none opacity-[0.02]" style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,1) 2px, rgba(0,0,0,1) 4px)' }} />
+      {/* Vignette */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 15, pointerEvents: 'none', background: 'radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.55) 100%)' }} />
+
+      {/* Scanlines */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 16, pointerEvents: 'none', opacity: 0.025, background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,1) 2px, rgba(0,0,0,1) 4px)' }} />
 
       {/* Agent Tags */}
-      {Object.entries(AGENT_MAP).map(([name, cfg]) => {
+      {Object.entries(AGENTS).map(([name, cfg]) => {
         const a = state.agents[name];
+        const isActive = a?.status === 'working' || a?.status === 'waiting';
         return (
-          <div key={`tag-${name}`} className={`absolute ${cfg.tagPos} z-[25] cursor-pointer group`}>
-            <div className="bg-black/80 border border-purple-500/50 rounded-lg px-2.5 py-1.5 backdrop-blur-md transition-all group-hover:bg-purple-500/20 group-hover:border-purple-500 group-hover:shadow-[0_0_16px_rgba(151,85,255,0.4)]">
-              <div className="flex items-center gap-1.5 text-[11px] font-bold text-white">
-                <span className={`w-[7px] h-[7px] rounded-full flex-shrink-0 ${STATUS_DOT[a?.status || 'idle']}`} />
+          <div key={`tag-${name}`} style={{ position: 'absolute', ...cfg.tagPos, zIndex: 25, cursor: 'pointer' }}>
+            <div style={{
+              background: isActive ? 'rgba(151,85,255,0.22)' : 'rgba(0,0,0,0.78)',
+              border: `1px solid ${isActive ? '#9755FF' : 'rgba(151,85,255,0.5)'}`,
+              borderRadius: 8, padding: '5px 10px', backdropFilter: 'blur(8px)', whiteSpace: 'nowrap',
+              boxShadow: isActive ? '0 0 16px rgba(151,85,255,0.4)' : 'none',
+              transition: 'all 0.3s'
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', flexShrink: 0, ...(DOT_STYLES[a?.status || 'idle'] || DOT_STYLES.idle) }} />
                 {cfg.label}
               </div>
-              <div className="text-[9px] text-[#8b84a8] font-mono mt-0.5">{cfg.role}</div>
-              <div className="text-[9px] text-[#8b84a8] font-mono mt-0.5">{a?.message || a?.status || 'idle'}</div>
+              <div style={{ fontSize: 9, color: '#8b84a8', fontFamily: "'DM Mono', monospace", marginTop: 1 }}>{cfg.role}</div>
+              <div style={{ fontSize: 9, color: isActive ? '#c49aff' : '#8b84a8', fontFamily: "'DM Mono', monospace", marginTop: 3 }}>{a?.message || ''}</div>
             </div>
           </div>
         );
       })}
 
       {/* Bubbles */}
-      {Object.entries(AGENT_MAP).map(([name, cfg]) => {
+      {Object.entries(AGENTS).map(([name, cfg]) => {
         const a = state.agents[name];
         const show = a?.status === 'working' || a?.status === 'waiting';
         return (
-          <div key={`bub-${name}`} className={`absolute ${cfg.bubPos} z-[30] pointer-events-none transition-all duration-300 ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-1.5 scale-90'}`}>
-            <div className="bg-[#080612]/95 border border-purple-500/50 rounded-[10px] px-3 py-2 max-w-[220px] font-mono text-[11px] text-white/85 leading-relaxed shadow-[0_0_20px_rgba(151,85,255,0.2)] relative">
-              <div className="text-[9px] text-purple-500 font-bold uppercase tracking-wider mb-1">{cfg.label}</div>
+          <div key={`bub-${name}`} style={{
+            position: 'absolute', ...cfg.bubPos, zIndex: 30, pointerEvents: 'none',
+            opacity: show ? 1 : 0, transform: show ? 'translateY(0) scale(1)' : 'translateY(6px) scale(0.9)',
+            transition: 'opacity 0.3s, transform 0.3s'
+          }}>
+            <div style={{ background: 'rgba(8,6,18,0.93)', border: '1px solid rgba(151,85,255,0.5)', borderRadius: 10, padding: '8px 12px', maxWidth: 220, fontSize: 11, color: 'rgba(255,255,255,0.85)', lineHeight: 1.5, fontFamily: "'DM Mono', monospace", boxShadow: '0 0 20px rgba(151,85,255,0.25)', position: 'relative' }}>
+              <div style={{ fontSize: 9, color: '#9755FF', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 3 }}>{cfg.label}</div>
               {a?.message || '...'}
-              <div className="absolute -bottom-1.5 left-4 w-2.5 h-1.5 bg-[#080612]/95" style={{ clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }} />
+              <div style={{ position: 'absolute', bottom: -6, left: 16, width: 10, height: 6, background: 'rgba(8,6,18,0.93)', clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }} />
             </div>
           </div>
         );

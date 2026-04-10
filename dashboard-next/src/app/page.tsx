@@ -1,49 +1,79 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { AppState, defaultState } from '@/lib/state';
 import AgentRoom from '@/components/AgentRoom';
 import SidePanel from '@/components/SidePanel';
 import TopBar from '@/components/TopBar';
 import BottomBar from '@/components/BottomBar';
+import LogPanel from '@/components/LogPanel';
 import CheckpointModal from '@/components/CheckpointModal';
+import GearModal from '@/components/GearModal';
+import StatusModal from '@/components/StatusModal';
+
+const STORAGE_KEY = 'activeClient';
 
 export default function Home() {
   const [state, setState] = useState<AppState>(defaultState);
   const [connected, setConnected] = useState(false);
   const [showCheckpoint, setShowCheckpoint] = useState(false);
-  const wsRef = useRef<WebSocket | null>(null);
+  const [showGearModal, setShowGearModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [activeClient, setActiveClientState] = useState<string | null>(null);
 
+  // Load activeClient from localStorage on mount
   useEffect(() => {
-    // Polling fallback since Next.js doesn't natively support WS
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) setActiveClientState(stored);
+  }, []);
+
+  // Persist activeClient to localStorage whenever it changes
+  const setActiveClient = (slug: string) => {
+    setActiveClientState(slug);
+    localStorage.setItem(STORAGE_KEY, slug);
+  };
+
+  // Poll state — use client-specific endpoint when activeClient is set
+  useEffect(() => {
     const poll = setInterval(async () => {
       try {
-        const res = await fetch('/api/state');
+        const url = activeClient
+          ? `/api/clients/${activeClient}/state`
+          : '/api/state';
+        const res = await fetch(url);
         const data = await res.json();
         setState(data);
         setConnected(true);
-
-        if (data.checkpoint && !data.checkpoint.responded) {
-          setShowCheckpoint(true);
-        }
+        if (data.checkpoint && !data.checkpoint.responded) setShowCheckpoint(true);
       } catch {
         setConnected(false);
       }
     }, 1500);
-
     return () => clearInterval(poll);
-  }, []);
-
-  const lastLog = state.log.length > 0 ? `${state.log[state.log.length - 1].time} ${state.log[state.log.length - 1].msg}` : 'aguardando...';
+  }, [activeClient]);
 
   return (
-    <main className="w-screen h-screen bg-black overflow-hidden relative" style={{ fontFamily: "'Syne', sans-serif" }}>
+    <main style={{ width: '100vw', height: '100vh', background: '#000', overflow: 'hidden', position: 'relative', fontFamily: "'Syne', sans-serif" }}>
       <AgentRoom state={state} />
       <SidePanel state={state} />
       <TopBar pipeline={state.pipeline} connected={connected} />
-      <BottomBar lastLog={lastLog} />
+      <LogPanel logs={state.log} />
+      <BottomBar onOpenGear={() => setShowGearModal(true)} onOpenStatus={() => setShowStatusModal(true)} />
       {showCheckpoint && state.checkpoint && (
-        <CheckpointModal checkpoint={state.checkpoint} onClose={() => setShowCheckpoint(false)} />
+        <CheckpointModal checkpoint={state.checkpoint} activeClient={activeClient} onClose={() => setShowCheckpoint(false)} />
+      )}
+      {showGearModal && (
+        <GearModal
+          activeClient={activeClient}
+          onClose={() => setShowGearModal(false)}
+          onClientChange={setActiveClient}
+        />
+      )}
+      {showStatusModal && (
+        <StatusModal
+          onClose={() => setShowStatusModal(false)}
+          onClientSelect={setActiveClient}
+        />
       )}
     </main>
   );

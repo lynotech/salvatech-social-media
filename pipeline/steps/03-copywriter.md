@@ -1,17 +1,23 @@
 ---
 agent: copywriter
 execution: inline
-inputFile: posts/{slug}/brief.md
-outputFile: posts/{slug}/copy.md
+inputFile: clients/{CLIENT}/posts/{slug}/brief.md
+outputFile: clients/{CLIENT}/posts/{slug}/copy.md
 model_tier: powerful
 ---
 
-# Copy Mensal — 4 Slides Panorâmicos
+# Copy — Slides do Carrossel
 
-Gere o copy de cada post com 4 slides + legendas.
+Leia o config do cliente ativo em `clients/{CLIENT}/config.yaml` antes de começar.
+Use os campos `agent_profiles.copywriter` (tom, slides, estrutura, regras) e `channels` do config.
 
-## Formato: 4 slides
+Gere o copy de cada post conforme a quantidade de slides definida em `agent_profiles.copywriter.slides`.
 
+## Formato: slides
+
+A estrutura narrativa vem de `agent_profiles.copywriter.estrutura` do config.yaml.
+
+Exemplo (4 slides — SalvaTech):
 ```
 Slide 01 (CAPA)  → Gancho — para o scroll
 Slide 02         → Problema — apresenta a dor
@@ -21,6 +27,7 @@ Slide 04 (CTA)   → Ação — o que fazer agora
 
 ## Regras
 
+Leia as regras de `agent_profiles.copywriter.regras` do config.yaml. Exemplo (SalvaTech):
 - Máximo 15 palavras por slide
 - ZONA_SUB da capa: máx 8 palavras
 - ZONA_BODY dos internos: 2–3 frases, máx 30 palavras. Desenvolva o ponto.
@@ -53,6 +60,8 @@ ZONA_CTA:      [ação curta]
 ```
 
 ## Formato — legenda.md
+
+Gere legendas apenas pros canais definidos em `channels` do `clients/{CLIENT}/config.yaml`.
 
 ```
 [LEGENDA — INSTAGRAM]

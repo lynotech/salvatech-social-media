@@ -1,19 +1,21 @@
 ---
 agent: estrategista
 execution: inline
-outputFile: posts/planejamento-{MES}.md
+outputFile: clients/{CLIENT}/posts/planejamento-{MES}.md
 model_tier: powerful
 ---
 
 # Planejamento Mensal — Pesquisa e Definição de Temas
 
-Empresa: SalvaTech — software house especializada em tecnologia, IA e automação para empresas B2B brasileiras.
-Mascote: chimpanzé astronauta. Paleta: dark (#0a0414) + roxo (#9755FF).
-Objetivo: construir autoridade no Instagram, LinkedIn e TikTok. Gerar salvamentos e engajamento.
-Formato: 7 slides por post (capa + 5 pontos + CTA). Dimensão: 1080x1350px.
+Leia o config do cliente ativo em `clients/{CLIENT}/config.yaml` antes de começar.
+Use os campos `name`, `audience`, `pillars`, `research_topics`, `channels`, `schedule` e `agent_profiles.estrategista` do config.
 
 ## Calendário de posts
 
+Leia o campo `schedule` do `clients/{CLIENT}/config.yaml` pra definir o calendário.
+O número de posts por mês vem de `schedule.posts_per_month`.
+
+Exemplo (SalvaTech — referência):
 ```
 Semana 1:  Quarta (Instagram+TikTok) + Sexta (Instagram+TikTok)
 Semana 2:  Segunda (LinkedIn) + Quarta (Instagram+TikTok)
@@ -24,23 +26,22 @@ Semana 4:  Segunda (LinkedIn) + Quarta (Instagram+TikTok)
 
 ## Sua missão
 
-1. Consulte `_memory/runs.md` para NÃO repetir temas dos últimos 30 dias
-2. Use a skill `apify` para pesquisar tendências reais do mercado:
-   - Tendências de IA e automação para PMEs brasileiras (últimos 30 dias)
-   - Dores de empresários B2B com tecnologia e sistemas
-   - O que está gerando engajamento no LinkedIn BR no nicho de tech/gestão
-   - Notícias e lançamentos tech relevantes para PMEs
-3. Selecione **8 temas** para o mês — 1 por post
-4. Distribua entre os pilares (sem repetir pilar em posts consecutivos)
+1. Consulte `clients/{CLIENT}/_memory/runs.md` para NÃO repetir temas dos últimos 30 dias
+2. Use a skill `apify` para pesquisar tendências reais do mercado, usando os `research_topics` do config:
+   - Use as queries definidas em `research_topics` do config.yaml
+   - Use as fontes definidas em `agent_profiles.estrategista.fontes`
+   - Priorize conforme `agent_profiles.estrategista.prioridade`
+3. Selecione o número de temas conforme `schedule.posts_per_month` do config
+4. Distribua entre os pilares definidos em `pillars` do config (sem repetir pilar em posts consecutivos)
 5. Defina a composição visual de cada capa (A/B/C/D — sem repetir consecutivamente)
 6. Para cada tema, crie a pasta e o brief:
 
 ```bash
-mkdir -p posts/{slug}/assets posts/{slug}/slides posts/{slug}/export
+mkdir -p clients/{CLIENT}/posts/{slug}/assets clients/{CLIENT}/posts/{slug}/slides clients/{CLIENT}/posts/{slug}/export
 ```
 
-7. Salve cada brief em `posts/{slug}/brief.md`
-8. Salve o planejamento consolidado em `posts/planejamento-{MES}.md`
+7. Salve cada brief em `clients/{CLIENT}/posts/{slug}/brief.md`
+8. Salve o planejamento consolidado em `clients/{CLIENT}/posts/planejamento-{MES}.md`
 
 ## Formato do planejamento mensal
 
@@ -71,19 +72,19 @@ mkdir -p posts/{slug}/assets posts/{slug}/slides posts/{slug}/export
 ```
 SLUG:          {AAAA-MM-DD}-{tema-em-kebab-case}
 TEMA:          [título direto]
-PILAR:         [AUTORIDADE / VALOR PRÁTICO / BASTIDORES / PROVOCAÇÃO]
-CANAL FOCO:    [Instagram / LinkedIn / TikTok]
-DIA DE POST:   [Segunda / Quarta / Sexta]
+PILAR:         [pilar do config.yaml do cliente]
+CANAL FOCO:    [canal do config.yaml do cliente]
+DIA DE POST:   [dia conforme schedule do config]
 SEMANA:        [1 / 2 / 3 / 4]
 
 POR QUÊ AGORA:
 [2-3 linhas com dado ou tendência real encontrada na pesquisa]
 
 PÚBLICO DO POST:
-[Quem vai parar o scroll]
+[Quem vai parar o scroll — baseado no audience do config]
 
 ÂNGULO:
-[Como a SalvaTech aborda esse tema — perspectiva única]
+[Como o cliente aborda esse tema — perspectiva única]
 
 GANCHO SUGERIDO:
 [1 ideia de headline para o Copywriter partir]
@@ -97,12 +98,12 @@ COMPOSIÇÃO DE CAPA:
 OBJETIVO:
 [ ] Engajamento  [ ] Salvamento  [ ] Alcance  [ ] Conversão
 
-ESTRUTURA DOS 7 SLIDES:
+ESTRUTURA DOS SLIDES:
   Slide 1 (capa):   [tema central + gancho]
   Slide 2:          [ponto 1]
   Slide 3:          [ponto 2]
-  Slide 4:          [ponto 3]
-  Slide 5:          [ponto 4]
-  Slide 6:          [ponto 5]
-  Slide 7 (CTA):    [ação + benefício]
+  ...
+  Slide N (CTA):    [ação + benefício]
 ```
+
+> O número de slides vem de `agent_profiles.copywriter.slides` do config.yaml.

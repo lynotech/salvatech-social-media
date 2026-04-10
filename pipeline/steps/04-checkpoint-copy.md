@@ -2,7 +2,7 @@
 type: checkpoint
 ---
 
-Revise os copys dos 8 posts do mês.
+Revise os copys dos posts do mês (quantidade conforme `schedule.posts_per_month` do `clients/{CLIENT}/config.yaml`).
 
 Aprova todos os copys?
 
