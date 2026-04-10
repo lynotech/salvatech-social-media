@@ -35,6 +35,7 @@ export default function Home() {
 
   // Poll state — use client-specific endpoint when activeClient is set
   useEffect(() => {
+    let prevPipeline = '';
     const poll = setInterval(async () => {
       try {
         const url = activeClient
@@ -45,6 +46,30 @@ export default function Home() {
         setState(data);
         setConnected(true);
         if (data.checkpoint && !data.checkpoint.responded) setShowCheckpoint(true);
+
+        // Auto-reset agents 5s after pipeline finishes
+        if (data.pipeline === 'done' && prevPipeline !== 'done') {
+          setTimeout(() => {
+            if (activeClient) {
+              fetch(`/api/clients/${activeClient}/status`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  pipeline: 'idle',
+                  agent: 'orquestrador', status: 'idle', message: '',
+                }),
+              });
+              ['estrategista','copywriter','ilustrador','designer'].forEach(a => {
+                fetch(`/api/clients/${activeClient}/status`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ agent: a, status: 'idle', message: '' }),
+                });
+              });
+            }
+          }, 5000);
+        }
+        prevPipeline = data.pipeline || '';
       } catch {
         setConnected(false);
       }

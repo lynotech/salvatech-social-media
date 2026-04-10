@@ -67,25 +67,20 @@ EXECUTE AGORA.`,
 Use notify.js --client {CLIENT} a cada passo. EXECUTE AGORA.`,
 
   onboarding: SILENT + `Voce vai conduzir o onboarding de um novo cliente. Leia clients/salvatech/config.yaml como REFERENCIA de estrutura.
-Faca as perguntas abaixo via checkpoint (uma por vez ou agrupadas logicamente). Use node dashboard/notify.js --client {CLIENT} --checkpoint para cada pergunta.
+Faca TODAS as perguntas abaixo em UM UNICO checkpoint. NAO faca uma pergunta por vez. Agrupe TUDO numa unica mensagem. Use node dashboard/notify.js --client {CLIENT} --checkpoint com todas as perguntas de uma vez.
 
-PERGUNTAS DO ONBOARDING:
-1. Qual o nome da empresa?
-2. Quais as cores da marca? (primaria, secundaria, destaque, fundo, texto, muted) — pode mandar link do site que eu extraio
-3. Quais as fontes? (headline e body)
-4. Tem logo? Se sim, coloque em clients/{slug}/assets/logo.png e informe o caminho. Se nao, deixe vazio por enquanto.
-5. Qual a estrategia de imagem? (mascote-ia, imagem-ia, fotos, mix)
-   - Se mascote-ia: descreva o personagem/mascote
-   - Se imagem-ia: descreva o estilo visual desejado
-   - Se fotos: confirme que vai colocar fotos em assets/photos/
-   - Se mix: defina qual estrategia pra cada tipo de slide
-6. Quais canais? (Instagram, LinkedIn, TikTok)
-7. Quantos posts por mes?
-8. Quais dias da semana posta? E em qual canal cada dia?
-9. Quais os pilares de conteudo? (minimo 2 — nome e descricao de cada)
-10. Qual o publico-alvo?
-11. Qual o tom de voz? (formal, casual, tecnico, provocativo, etc)
-12. Quais topicos de pesquisa pro estrategista buscar?
+PERGUNTAS (envie TODAS de uma vez no checkpoint):
+1. Nome da empresa
+2. Cores da marca (primaria, secundaria, destaque, fundo, texto, muted)
+3. Fontes (headline e body)
+4. Tem logo? Caminho do arquivo
+5. Estrategia de imagem (mascote-ia, imagem-ia, fotos, mix) — se mascote, descreva o personagem
+6. Canais (Instagram, LinkedIn, TikTok)
+7. Quantos posts por mes e quais dias/canais
+8. Pilares de conteudo (minimo 2, nome e descricao)
+9. Publico-alvo
+10. Tom de voz
+11. Topicos de pesquisa
 
 APOS COLETAR TUDO:
 1. Gere o slug em kebab-case a partir do nome

@@ -1,0 +1,94 @@
+# Empresa Teste — Client Configuration
+# Gerado via onboarding em 2026-04-10
+
+name: "Empresa Teste"
+slug: "empresa-teste"
+
+# Identidade Visual
+visual:
+  background: "#f8f5f0"
+  primary: "#7cb9a0"
+  secondary: "#b5d5c8"
+  highlight: "#e8a598"
+  text: "#2d2d2d"
+  muted: "#a0a0a0"
+  headline_font: "Playfair Display"
+  body_font: "Nunito"
+  logo: ""  # sem logo por enquanto
+
+# Estratégia de Imagem
+image_strategy: "fotos"
+# Coloque fotos reais em: clients/empresa-teste/assets/photos/
+
+# Canais
+channels:
+  - instagram
+
+# Calendário (4 posts/mês — toda quarta-feira no Instagram)
+schedule:
+  posts_per_month: 4
+  weeks:
+    - { day: "quarta", channel: "instagram" }
+    - { day: "quarta", channel: "instagram" }
+    - { day: "quarta", channel: "instagram" }
+    - { day: "quarta", channel: "instagram" }
+
+# Pilares de Conteúdo
+pillars:
+  - name: "Educação"
+    description: "Benefícios do pilates, explicações de exercícios, posturas e anatomia"
+    channels: ["instagram"]
+  - name: "Motivação"
+    description: "Inspiração, transformações, frases motivacionais, conquistas dos alunos"
+    channels: ["instagram"]
+  - name: "Dicas Práticas"
+    description: "Exercícios para fazer em casa, técnicas de respiração, progressões"
+    channels: ["instagram"]
+  - name: "Bastidores"
+    description: "Dia a dia do estúdio, professores, ambiente, cultura"
+    channels: ["instagram"]
+
+# Público-alvo
+audience: "Pessoas que buscam saúde, bem-estar e qualidade de vida através do pilates"
+
+# Tópicos de Pesquisa
+research_topics:
+  - "tendências pilates brasil 2026"
+  - "noticias fitness wellness"
+  - "benefícios pilates saúde"
+  - "pilates para iniciantes"
+  - "pilates reabilitação"
+  - "pilates studios tendencias"
+
+# Perfis dos Agentes
+agent_profiles:
+  estrategista:
+    fontes: ["google trends", "instagram fitness BR", "portais saúde", "google news"]
+    tipo_temas: "saúde, bem-estar, pilates, fitness, qualidade de vida"
+    prioridade: "tendências da semana, conteúdo educativo, engajamento"
+
+  copywriter:
+    tom: "amigo próximo que entende de saúde — casual, acolhedor e motivacional"
+    slides: 5
+    estrutura: "gancho → problema/dor → solução → benefício → CTA"
+    regras:
+      - "máximo 12 palavras por slide"
+      - "linguagem acessível, sem jargão técnico excessivo"
+      - "ZONA_SUB máx 8 palavras"
+      - "usar emojis com moderação para humanizar"
+      - "nunca intimidar — pilates é para todos"
+
+  ilustrador:
+    estilo: "fotos reais, luminosas, clean, wellness aesthetic"
+    composicoes: ["a", "b", "c"]
+    regras:
+      - "usar fotos de clients/empresa-teste/assets/photos/"
+      - "preferir fotos com boa iluminação natural"
+      - "pessoas em movimento ou em poses de pilates"
+      - "ambiente limpo e acolhedor"
+      - "sem texto sobreposto nas fotos"
+
+  designer:
+    templates: ["capa-a", "capa-b", "slide-i1", "slide-i2", "slide-cta"]
+    rodape: "logo + numeração"
+    efeitos: ["overlay suave", "gradient claro", "thin divider verde"]

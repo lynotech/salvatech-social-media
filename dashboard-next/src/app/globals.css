@@ -2,3 +2,10 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #000; overflow: hidden; }
+
+/* Custom scrollbar — purple theme */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: rgba(10,4,20,0.4); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(151,85,255,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(151,85,255,0.5); }
+* { scrollbar-width: thin; scrollbar-color: rgba(151,85,255,0.3) rgba(10,4,20,0.4); }
