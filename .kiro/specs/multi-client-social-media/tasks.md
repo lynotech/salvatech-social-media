@@ -123,11 +123,11 @@
 
 ## Fase 6: Testes e Validação
 
-- [-] 15. Testar fluxo completo
-  - [ ] 15.1 Rodar migração da SalvaTech e verificar que config.yaml está completo
-  - [ ] 15.2 Rodar "1 post completo" pra SalvaTech via GearModal e verificar que funciona igual antes
-  - [ ] 15.3 Criar um segundo cliente via onboarding e verificar que config.yaml é gerado
-  - [ ] 15.4 Rodar "1 post completo" pro segundo cliente e verificar que usa o config dele
-  - [ ] 15.5 Verificar StatusModal mostra ambos os clientes com progresso correto
-  - [ ] 15.6 Verificar que trocar de cliente no GearModal atualiza o estado no agentroom
-  - [ ] 15.7 Commitar e pushar pro git
+- [x] 15. Testar fluxo completo
+  - [x] 15.1 Rodar migração da SalvaTech e verificar que config.yaml está completo
+  - [x] 15.2 Rodar "1 post completo" pra SalvaTech via GearModal e verificar que funciona igual antes
+  - [x] 15.3 Criar um segundo cliente via onboarding e verificar que config.yaml é gerado
+  - [x] 15.4 Rodar "1 post completo" pro segundo cliente e verificar que usa o config dele
+  - [x] 15.5 Verificar StatusModal mostra ambos os clientes com progresso correto
+  - [x] 15.6 Verificar que trocar de cliente no GearModal atualiza o estado no agentroom
+  - [x] 15.7 Commitar e pushar pro git

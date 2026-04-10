@@ -41,16 +41,65 @@ export default function CheckpointModal({ checkpoint, activeClient, onClose }: C
   };
 
   return (
-    <div className="fixed inset-0 bg-black/85 z-[100] flex items-center justify-center">
-      <div className="bg-[#110820] border border-purple-500/30 rounded-xl p-7 w-[500px] max-w-[90vw] max-h-[80vh] overflow-y-auto shadow-[0_0_80px_rgba(151,85,255,0.1)]">
-        <div className="text-sm font-bold text-amber-500 mb-5 pb-3.5 border-b border-purple-500/10">Checkpoint</div>
-        <div className="text-sm text-purple-300 leading-relaxed mb-4">{checkpoint.question}</div>
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 100,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'rgba(0,0,0,0.8)',
+      backdropFilter: 'blur(8px)',
+    }}>
+      <div style={{
+        background: 'rgba(151,85,255,0.14)',
+        border: '1px solid #9755FF',
+        borderRadius: 12,
+        padding: '24px 28px',
+        width: 480,
+        maxWidth: '90vw',
+        maxHeight: '80vh',
+        overflowY: 'auto',
+        backdropFilter: 'blur(12px)',
+        boxShadow: '0 0 40px rgba(151,85,255,0.25)',
+        fontFamily: "'DM Mono', monospace",
+      }}>
 
-        {/* Items list (shared across all types) */}
+        {/* Header */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          marginBottom: 16, paddingBottom: 12,
+          borderBottom: '1px solid rgba(151,85,255,0.2)',
+        }}>
+          <span style={{
+            width: 8, height: 8, borderRadius: '50%',
+            background: '#f5a623', boxShadow: '0 0 8px #f5a623',
+            animation: 'dotPulse 2s infinite',
+          }} />
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#fff', letterSpacing: '0.02em' }}>
+            Checkpoint
+          </span>
+        </div>
+
+        {/* Question */}
+        <div style={{
+          fontSize: 13, color: '#e0d0ff', lineHeight: 1.6,
+          marginBottom: 20,
+        }}>
+          {checkpoint.question}
+        </div>
+
+        {/* Items */}
         {checkpoint.items?.length > 0 && (
-          <div className="flex flex-col gap-1.5 mb-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
             {checkpoint.items.map((item, i) => (
-              <div key={i} className="bg-[#0a0414]/60 border border-purple-500/10 rounded-md px-3 py-2.5 text-xs text-[#9980cc] leading-relaxed">{item}</div>
+              <div key={i} style={{
+                background: 'rgba(30,20,50,0.7)',
+                border: '1px solid rgba(151,85,255,0.15)',
+                borderRadius: 8,
+                padding: '10px 14px',
+                fontSize: 11,
+                color: '#c49aff',
+                lineHeight: 1.6,
+              }}>
+                {item}
+              </div>
             ))}
           </div>
         )}
@@ -62,32 +111,45 @@ export default function CheckpointModal({ checkpoint, activeClient, onClose }: C
               value={feedback}
               onChange={e => setFeedback(e.target.value)}
               placeholder="Digite sua resposta..."
-              className="w-full min-h-[60px] p-3 rounded-lg bg-[#0a0414]/80 border border-purple-500/15 text-white text-xs outline-none resize-y mb-4 placeholder:text-[#444] focus:border-purple-500"
+              style={{
+                width: '100%', minHeight: 70, padding: 12, borderRadius: 8,
+                background: 'rgba(10,4,20,0.7)', border: '1px solid rgba(151,85,255,0.2)',
+                color: '#fff', fontSize: 12, outline: 'none', resize: 'vertical',
+                marginBottom: 16, fontFamily: "'DM Mono', monospace",
+              }}
             />
-            <div className="flex gap-2.5">
-              <button
-                onClick={handleTextSubmit}
-                disabled={!feedback.trim()}
-                className="flex-1 py-2.5 rounded-lg bg-purple-500/10 text-purple-300 border border-purple-500/25 text-xs font-semibold hover:bg-purple-500/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Enviar
-              </button>
-            </div>
+            <button
+              onClick={handleTextSubmit}
+              disabled={!feedback.trim()}
+              style={{
+                width: '100%', padding: '10px 0', borderRadius: 8,
+                background: 'rgba(151,85,255,0.15)', border: '1px solid rgba(151,85,255,0.4)',
+                color: '#c49aff', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                opacity: feedback.trim() ? 1 : 0.4,
+                fontFamily: "'DM Mono', monospace",
+              }}
+            >
+              Enviar
+            </button>
           </>
         )}
 
         {/* Multiple choice mode */}
         {checkpointType === 'choice' && checkpoint.options && (
-          <div className="flex flex-col gap-2">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {checkpoint.options.map((option, i) => (
               <button
                 key={i}
                 onClick={() => handleChoiceSelect(option)}
-                className={`w-full text-left px-4 py-3 rounded-lg border text-xs font-medium transition-colors ${
-                  selectedOption === option
-                    ? 'bg-purple-500/20 border-purple-500/50 text-purple-200'
-                    : 'bg-[#0a0414]/60 border-purple-500/10 text-[#9980cc] hover:bg-purple-500/10 hover:border-purple-500/25'
-                }`}
+                style={{
+                  width: '100%', textAlign: 'left', padding: '10px 14px', borderRadius: 8,
+                  background: selectedOption === option ? 'rgba(151,85,255,0.2)' : 'rgba(30,20,50,0.7)',
+                  border: `1px solid ${selectedOption === option ? 'rgba(151,85,255,0.5)' : 'rgba(151,85,255,0.15)'}`,
+                  color: selectedOption === option ? '#e0d0ff' : '#9980cc',
+                  fontSize: 12, cursor: 'pointer',
+                  fontFamily: "'DM Mono', monospace",
+                  transition: 'all 0.15s',
+                }}
               >
                 {option}
               </button>
@@ -101,19 +163,40 @@ export default function CheckpointModal({ checkpoint, activeClient, onClose }: C
             <textarea
               value={feedback}
               onChange={e => setFeedback(e.target.value)}
-              placeholder="Sugestão de ajuste..."
-              className="w-full min-h-[60px] p-3 rounded-lg bg-[#0a0414]/80 border border-purple-500/15 text-white text-xs outline-none resize-y mb-4 placeholder:text-[#444] focus:border-purple-500"
+              placeholder="Sugestão de ajuste (opcional)..."
+              style={{
+                width: '100%', minHeight: 70, padding: 12, borderRadius: 8,
+                background: 'rgba(10,4,20,0.7)', border: '1px solid rgba(151,85,255,0.2)',
+                color: '#fff', fontSize: 12, outline: 'none', resize: 'vertical',
+                marginBottom: 16, fontFamily: "'DM Mono', monospace",
+              }}
             />
-            <div className="flex gap-2.5">
+            <div style={{ display: 'flex', gap: 10 }}>
               <button
                 onClick={handleApprove}
-                className="flex-1 py-2.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 text-xs font-semibold hover:bg-emerald-500/20 transition-colors"
+                style={{
+                  flex: 1, padding: '11px 0', borderRadius: 8,
+                  background: 'rgba(34,214,135,0.12)', border: '1px solid rgba(34,214,135,0.35)',
+                  color: '#22d687', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  fontFamily: "'DM Mono', monospace",
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(34,214,135,0.22)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(34,214,135,0.12)'}
               >
                 Aprovar
               </button>
               <button
                 onClick={handleAdjust}
-                className="flex-1 py-2.5 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/25 text-xs font-semibold hover:bg-amber-500/20 transition-colors"
+                style={{
+                  flex: 1, padding: '11px 0', borderRadius: 8,
+                  background: 'rgba(245,166,35,0.12)', border: '1px solid rgba(245,166,35,0.35)',
+                  color: '#f5a623', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  fontFamily: "'DM Mono', monospace",
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,166,35,0.22)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(245,166,35,0.12)'}
               >
                 Pedir ajuste
               </button>

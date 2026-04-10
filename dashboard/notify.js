@@ -40,6 +40,11 @@ if (!json) {
   process.exit(1);
 }
 
+// Strip surrounding single quotes if cmd.exe passed them literally (Windows fallback)
+if (json.startsWith("'") && json.endsWith("'") && json.length > 2) {
+  json = json.slice(1, -1);
+}
+
 // Resolve endpoint: multi-client routes when --client is present, fallback to old routes
 let endpoint;
 if (client) {

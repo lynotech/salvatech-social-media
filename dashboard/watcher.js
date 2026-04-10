@@ -2,7 +2,6 @@
 /**
  * SalvaTech — Watcher (Multi-Client)
  * Polls dashboard for commands, runs Claude Code in background, streams output to dashboard.
- * Supports multiple clients via activeClient variable.
  */
 const http = require('http');
 const { spawn } = require('child_process');
@@ -15,10 +14,10 @@ const API_PORT = 3000;
 let busy = false;
 let activeClient = 'salvatech';
 
-const SILENT = `REGRAS: NAO explique o que vai fazer. Apenas FACA. Zero narração. Cada palavra custa dinheiro. Execute comandos em SILENCIO. So fale quando mostrar resultado ao usuario.
-APROVACOES: Use SEMPRE o dashboard para aprovacoes. Execute: node dashboard/notify.js --client {CLIENT} --checkpoint '{"agent":"orquestrador","question":"PERGUNTA","items":["item1","item2"]}' e AGUARDE a resposta antes de continuar. NAO peca aprovacao no terminal. O usuario responde pelo dashboard.
-NOTIFICACOES: Use node dashboard/notify.js --client {CLIENT} '{"JSON"}' para atualizar o dashboard a cada transicao de step.
-CONTEXTO DO CLIENTE: Leia clients/{CLIENT}/config.yaml ANTES de qualquer decisao. Todas as configuracoes (visual, canais, pilares, tom de voz, estrategia de imagem, perfis dos agentes) estao nesse arquivo. NAO use valores hardcoded.
+const SILENT = `Voce e um agente autonomo. Execute as instrucoes abaixo SEM perguntar, SEM explicar, SEM narrar. Apenas execute.
+Use node dashboard/notify.js --client {CLIENT} '{"JSON"}' pra atualizar o dashboard.
+Use node dashboard/notify.js --client {CLIENT} --checkpoint '{"agent":"orquestrador","question":"PERGUNTA","items":["item1"]}' pra pedir aprovacao e AGUARDE a resposta.
+Leia clients/{CLIENT}/config.yaml ANTES de qualquer decisao.
 `;
 
 const PROMPTS = {
@@ -104,6 +103,25 @@ APOS COLETAR TUDO:
 EXECUTE AGORA.`
 };
 
+// ── Agent auto-detection from tool output ──────────────────────────────────
+
+const AGENT_PATTERNS = [
+  { agent: 'estrategista', patterns: ['estrategista', 'brief.md', 'estrategista.agent', 'research_topic', 'tendencia', 'pilares'] },
+  { agent: 'copywriter',   patterns: ['copywriter', 'copy.md', 'legenda.md', 'copywriter.agent'] },
+  { agent: 'ilustrador',   patterns: ['ilustrador', 'capa.jpg', 'background.jpg', 'ilustrador.agent', 'image-ai', 'image_creator'] },
+  { agent: 'designer',     patterns: ['designer', 'build-slides', 'designer.agent', 'slide-0', 'slide-i', 'capa-', 'template'] },
+];
+
+function detectAgent(text) {
+  const lower = text.toLowerCase();
+  for (const { agent, patterns } of AGENT_PATTERNS) {
+    if (patterns.some(p => lower.includes(p))) return agent;
+  }
+  return null;
+}
+
+// ── Polling ────────────────────────────────────────────────────────────────
+
 function pollCommand() {
   if (busy) return;
   const pollUrl = `/api/clients/${activeClient}/command`;
@@ -113,7 +131,6 @@ function pollCommand() {
     res.on('end', () => {
       try {
         const data = JSON.parse(body);
-        // Support setting activeClient via API response
         if (data.activeClient) {
           activeClient = data.activeClient;
           console.log(`  >> Cliente ativo: ${activeClient}`);
@@ -129,65 +146,173 @@ function pollCommand() {
   req.setTimeout(3000, () => req.destroy());
 }
 
+// ── Execute ────────────────────────────────────────────────────────────────
+
 function executeCommand(cmd) {
   busy = true;
-  // Replace {CLIENT} placeholder with the active client slug
   const prompt = PROMPTS[cmd].replace(/{CLIENT}/g, activeClient);
 
-  notify({ pipeline: 'running', agent: 'orquestrador', status: 'working', message: 'Coordenando...', log: `${cmd} iniciado (${activeClient})`, logType: 'agent' });
+  // Write prompt to temp file — avoids cmd.exe double-quote escaping issues
+  const tmpFile = path.join(PROJECT_ROOT, '.tmp-prompt.txt');
+  try {
+    fs.writeFileSync(tmpFile, prompt, 'utf-8');
+  } catch (e) {
+    console.error('  >> Erro escrevendo prompt:', e.message);
+    notify({ pipeline: 'error', log: 'Erro interno ao iniciar', logType: 'err' });
+    busy = false;
+    return;
+  }
 
-  // Run Claude Code as background process — NO window, capture output
-  const claude = spawn('claude', ['--dangerously-skip-permissions', prompt], {
+  // Reset all agents to idle, activate orquestrador
+  notify({
+    pipeline: 'running',
+    agent: 'orquestrador', status: 'working', message: 'Coordenando...',
+    log: `${cmd} iniciado (${activeClient})`, logType: 'agent'
+  });
+  for (const a of ['estrategista', 'copywriter', 'ilustrador', 'designer']) {
+    notify({ agent: a, status: 'idle', message: '' });
+  }
+
+  // Use PowerShell + -EncodedCommand to avoid ALL quoting/escaping issues on Windows
+  // -EncodedCommand accepts base64-encoded UTF-16LE, no special chars to worry about
+  const escapedPath = tmpFile.replace(/'/g, "''");
+  const psScript = `$p = [System.IO.File]::ReadAllText('${escapedPath}'); & claude --dangerously-skip-permissions --output-format stream-json --verbose -p $p`;
+  const encodedCmd = Buffer.from(psScript, 'utf16le').toString('base64');
+
+  const claude = spawn('powershell.exe', [
+    '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
+    '-EncodedCommand', encodedCmd
+  ], {
     cwd: PROJECT_ROOT,
     stdio: ['ignore', 'pipe', 'pipe'],
-    shell: true,
-    windowsHide: true  // No CMD window on Windows
+    windowsHide: true
   });
 
-  let lastLine = '';
+  let buffer = '';
+  let lastLog = '';
+  let currentAgent = 'orquestrador';
 
   claude.stdout.on('data', d => {
-    const text = d.toString();
-    process.stdout.write(text);
-    // Send meaningful lines to dashboard log
-    text.split('\n').filter(l => l.trim()).forEach(line => {
-      const clean = line.trim().substring(0, 150);
-      if (clean && clean !== lastLine) {
-        lastLine = clean;
-        notify({ log: clean, logType: '' });
+    buffer += d.toString();
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      try {
+        const event = JSON.parse(line);
+
+        // Assistant message — text + tool_use blocks
+        if (event.type === 'assistant' && event.message?.content) {
+          for (const block of event.message.content) {
+
+            // Text block
+            if (block.type === 'text' && block.text) {
+              const clean = block.text.trim().slice(0, 160);
+              if (clean && clean !== lastLog) {
+                lastLog = clean;
+                console.log(`  [claude] ${clean}`);
+                notify({ log: clean, logType: '' });
+              }
+            }
+
+            // Tool use — auto-detect agent + log
+            if (block.type === 'tool_use') {
+              const toolName = block.name;
+              let logMsg = null;
+              let agentSwitch = null;
+
+              if (toolName === 'Bash' && block.input?.command) {
+                const c = block.input.command;
+                logMsg = c.length > 120 ? c.slice(0, 120) + '...' : c;
+                // Don't infer agent from notify.js calls (those set it explicitly)
+                if (!c.includes('notify.js')) {
+                  agentSwitch = detectAgent(c);
+                }
+              } else if (toolName === 'Write' && block.input?.file_path) {
+                const fp = block.input.file_path;
+                logMsg = `>> ${path.basename(fp)}`;
+                agentSwitch = detectAgent(fp);
+              } else if (toolName === 'Read' && block.input?.file_path) {
+                // Only infer agent from reads, don't log (too noisy)
+                agentSwitch = detectAgent(block.input.file_path);
+              } else if (toolName === 'Glob' || toolName === 'Grep') {
+                // Minimal — don't clutter logs
+              }
+
+              if (agentSwitch && agentSwitch !== currentAgent) {
+                currentAgent = agentSwitch;
+                const msg = logMsg ? logMsg.slice(0, 60) : 'Trabalhando...';
+                console.log(`  [agente] ${currentAgent}`);
+                notify({
+                  agent: currentAgent, status: 'working', message: msg,
+                  log: logMsg || `${currentAgent} ativado`, logType: 'agent'
+                });
+              } else if (logMsg && logMsg !== lastLog) {
+                lastLog = logMsg;
+                console.log(`  [${toolName}] ${logMsg}`);
+                notify({ log: logMsg, logType: 'agent' });
+              }
+            }
+          }
+        }
+
+      } catch {
+        // Non-JSON raw output
+        const clean = line.trim().slice(0, 160);
+        if (clean && clean !== lastLog) {
+          lastLog = clean;
+          console.log(`  [raw] ${clean}`);
+          notify({ log: clean, logType: '' });
+        }
       }
-    });
+    }
   });
 
   claude.stderr.on('data', d => {
-    process.stderr.write(d.toString());
+    const text = d.toString().trim();
+    if (text) {
+      console.error(`  [stderr] ${text.slice(0, 200)}`);
+      // Only surface to dashboard if it looks like an actual error
+      if (text.toLowerCase().includes('error') || text.toLowerCase().includes('erro')) {
+        notify({ log: text.slice(0, 120), logType: 'err' });
+      }
+    }
   });
 
-  claude.on('close', (code) => {
+  claude.on('close', code => {
     console.log(`\n  >> Finalizado (exit ${code}) — cliente: ${activeClient}`);
+    try { fs.unlinkSync(tmpFile); } catch {}
     notify({
       pipeline: code === 0 ? 'done' : 'error',
-      agent: 'orquestrador', status: code === 0 ? 'done' : 'error',
-      message: code === 0 ? 'Concluido!' : 'Erro',
-      log: code === 0 ? 'Pipeline concluido' : `Erro (exit ${code})`,
+      agent: 'orquestrador',
+      status: code === 0 ? 'done' : 'error',
+      message: code === 0 ? 'Concluido!' : `Erro (${code})`,
+      log: code === 0 ? 'Pipeline concluido' : `Processo encerrou com erro (exit ${code})`,
       logType: code === 0 ? 'ok' : 'err'
     });
     busy = false;
   });
 
-  claude.on('error', (err) => {
-    console.error(`  >> Erro: ${err.message}`);
-    notify({ pipeline: 'error', agent: 'orquestrador', status: 'error', message: 'Erro', log: err.message, logType: 'err' });
+  claude.on('error', err => {
+    console.error(`  >> Spawn erro: ${err.message}`);
+    try { fs.unlinkSync(tmpFile); } catch {}
+    notify({
+      pipeline: 'error', agent: 'orquestrador', status: 'error',
+      message: 'Falha ao iniciar', log: err.message, logType: 'err'
+    });
     busy = false;
   });
 }
 
+// ── Notify ─────────────────────────────────────────────────────────────────
+
 function notify(obj) {
   const json = JSON.stringify(obj);
   const data = Buffer.from(json, 'utf-8');
-  const statusPath = `/api/clients/${activeClient}/status`;
   const req = http.request({
-    hostname: 'localhost', port: API_PORT, path: statusPath,
+    hostname: 'localhost', port: API_PORT,
+    path: `/api/clients/${activeClient}/status`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Content-Length': data.length }
   }, () => {});

@@ -2,31 +2,22 @@
 
 import { AppState } from '@/lib/state';
 
-// Mapeamento: nosso agente → imagem do personagem + posição da tag (do agentroom original)
-const AGENTS: Record<string, { label: string; role: string; img: string; tagPos: React.CSSProperties; bubPos: React.CSSProperties; anim: string }> = {
+const AGENTS: Record<string, { label: string; role: string; img: string; tagPos: React.CSSProperties; anim: string }> = {
   orquestrador: { label: 'Craudin The Boss', role: 'Orquestrador', img: 'boss.png',
-    tagPos: { bottom: '32%', left: '34%' }, bubPos: { bottom: '38%', left: '34%' },
+    tagPos: { bottom: '32%', left: '34%' },
     anim: 'bs 4s ease-in-out infinite' },
   estrategista: { label: 'Kako', role: 'Estrategista', img: 'estrategista.png',
-    tagPos: { top: '18%', left: '4%' }, bubPos: { top: '12%', left: '4%' },
+    tagPos: { top: '18%', left: '4%' },
     anim: 'sw 5s ease-in-out infinite' },
   designer: { label: 'Jorge Macaco', role: 'Designer', img: 'Designer.png',
-    tagPos: { top: '14%', left: '42%' }, bubPos: { top: '8%', left: '42%' },
+    tagPos: { top: '14%', left: '42%' },
     anim: 'fl 3.5s ease-in-out infinite' },
   copywriter: { label: 'Menor', role: 'Copywriter', img: 'copywriter.png',
-    tagPos: { top: '20%', right: '28%' }, bubPos: { top: '14%', right: '28%' },
+    tagPos: { top: '20%', right: '28%' },
     anim: 'tl 6s ease-in-out infinite' },
   ilustrador: { label: 'Wildson', role: 'Ilustrador', img: 'analista.png',
-    tagPos: { top: '30%', right: '15%' }, bubPos: { top: '24%', right: '15%' },
+    tagPos: { top: '30%', right: '15%' },
     anim: 'bf 3s ease-in-out infinite' },
-};
-
-const DOT_STYLES: Record<string, React.CSSProperties> = {
-  idle: { background: '#555', boxShadow: 'none' },
-  working: { background: '#9755FF', boxShadow: '0 0 8px #9755FF', animation: 'dotPulse 1.5s infinite' },
-  done: { background: '#22d687', boxShadow: '0 0 8px #22d687' },
-  waiting: { background: '#f5a623', boxShadow: '0 0 8px #f5a623', animation: 'dotPulse 2s infinite' },
-  error: { background: '#e94560', boxShadow: '0 0 8px #e94560' },
 };
 
 export default function AgentRoom({ state }: { state: AppState }) {
@@ -49,21 +40,16 @@ export default function AgentRoom({ state }: { state: AppState }) {
       {/* Mesa central com holo glow */}
       <img src="/personagens/mesacentral.png" alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 4, animation: 'hdp 2.5s ease-in-out infinite' }} />
 
-      {/* Characters — each as full-size layer with animation */}
+      {/* Characters */}
       {Object.entries(AGENTS).map(([name, cfg], i) => {
         const a = state.agents[name];
         const isWorking = a?.status === 'working';
         return (
-          <img
-            key={name}
-            src={`/personagens/${cfg.img}`}
-            alt=""
+          <img key={name} src={`/personagens/${cfg.img}`} alt=""
             style={{
               position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
               zIndex: 5 + i,
-              animation: cfg.anim,
-              filter: isWorking ? undefined : undefined,
-              ...(isWorking ? { animation: `${cfg.anim}, glowPulse 1.5s ease-in-out infinite` } : {})
+              animation: isWorking ? `${cfg.anim}, glowPulse 1.5s ease-in-out infinite` : cfg.anim,
             }}
           />
         );
@@ -75,44 +61,40 @@ export default function AgentRoom({ state }: { state: AppState }) {
       {/* Scanlines */}
       <div style={{ position: 'absolute', inset: 0, zIndex: 16, pointerEvents: 'none', opacity: 0.025, background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,1) 2px, rgba(0,0,0,1) 4px)' }} />
 
-      {/* Agent Tags */}
+      {/* Agent Tags — único card por agente */}
       {Object.entries(AGENTS).map(([name, cfg]) => {
         const a = state.agents[name];
-        const isActive = a?.status === 'working' || a?.status === 'waiting';
+        const status = a?.status || 'idle';
+        const isActive = status === 'working' || status === 'waiting';
+        const isDone = status === 'done';
+
+        const borderColor = isActive ? '#9755FF' : isDone ? 'rgba(34,214,135,0.4)' : 'rgba(100,100,120,0.3)';
+        const bgColor = isActive ? 'rgba(151,85,255,0.18)' : 'rgba(30,25,45,0.75)';
+        const shadow = isActive ? '0 0 20px rgba(151,85,255,0.35)' : 'none';
+        const dotBg = isActive ? '#9755FF' : isDone ? '#22d687' : '#555';
+        const dotShadow = isActive ? '0 0 8px #9755FF' : isDone ? '0 0 8px #22d687' : 'none';
+        const dotAnim = isActive ? 'dotPulse 1.5s infinite' : 'none';
+        const msgColor = isActive ? '#c49aff' : '#666';
+
         return (
-          <div key={`tag-${name}`} style={{ position: 'absolute', ...cfg.tagPos, zIndex: 25, cursor: 'pointer' }}>
+          <div key={`tag-${name}`} style={{ position: 'absolute', ...cfg.tagPos, zIndex: 25 }}>
             <div style={{
-              background: isActive ? 'rgba(151,85,255,0.22)' : 'rgba(0,0,0,0.78)',
-              border: `1px solid ${isActive ? '#9755FF' : 'rgba(151,85,255,0.5)'}`,
-              borderRadius: 8, padding: '5px 10px', backdropFilter: 'blur(8px)', whiteSpace: 'nowrap',
-              boxShadow: isActive ? '0 0 16px rgba(151,85,255,0.4)' : 'none',
-              transition: 'all 0.3s'
+              background: bgColor,
+              border: `1px solid ${borderColor}`,
+              borderRadius: 8, padding: '6px 12px',
+              backdropFilter: 'blur(10px)',
+              whiteSpace: 'nowrap',
+              boxShadow: shadow,
+              transition: 'all 0.3s',
             }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: 5 }}>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', flexShrink: 0, ...(DOT_STYLES[a?.status || 'idle'] || DOT_STYLES.idle) }} />
+              <div style={{ fontSize: 11, fontWeight: 700, color: isActive ? '#fff' : '#aaa', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', flexShrink: 0, background: dotBg, boxShadow: dotShadow, animation: dotAnim }} />
                 {cfg.label}
               </div>
-              <div style={{ fontSize: 9, color: '#8b84a8', fontFamily: "'DM Mono', monospace", marginTop: 1 }}>{cfg.role}</div>
-              <div style={{ fontSize: 9, color: isActive ? '#c49aff' : '#8b84a8', fontFamily: "'DM Mono', monospace", marginTop: 3 }}>{a?.message || ''}</div>
-            </div>
-          </div>
-        );
-      })}
-
-      {/* Bubbles */}
-      {Object.entries(AGENTS).map(([name, cfg]) => {
-        const a = state.agents[name];
-        const show = a?.status === 'working' || a?.status === 'waiting';
-        return (
-          <div key={`bub-${name}`} style={{
-            position: 'absolute', ...cfg.bubPos, zIndex: 30, pointerEvents: 'none',
-            opacity: show ? 1 : 0, transform: show ? 'translateY(0) scale(1)' : 'translateY(6px) scale(0.9)',
-            transition: 'opacity 0.3s, transform 0.3s'
-          }}>
-            <div style={{ background: 'rgba(8,6,18,0.93)', border: '1px solid rgba(151,85,255,0.5)', borderRadius: 10, padding: '8px 12px', maxWidth: 220, fontSize: 11, color: 'rgba(255,255,255,0.85)', lineHeight: 1.5, fontFamily: "'DM Mono', monospace", boxShadow: '0 0 20px rgba(151,85,255,0.25)', position: 'relative' }}>
-              <div style={{ fontSize: 9, color: '#9755FF', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 3 }}>{cfg.label}</div>
-              {a?.message || '...'}
-              <div style={{ position: 'absolute', bottom: -6, left: 16, width: 10, height: 6, background: 'rgba(8,6,18,0.93)', clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }} />
+              <div style={{ fontSize: 9, color: isActive ? '#9980cc' : '#666', fontFamily: "'DM Mono', monospace", marginTop: 2 }}>{cfg.role}</div>
+              {a?.message && (
+                <div style={{ fontSize: 9, color: msgColor, fontFamily: "'DM Mono', monospace", marginTop: 3 }}>{a.message}</div>
+              )}
             </div>
           </div>
         );

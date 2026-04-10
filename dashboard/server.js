@@ -1,3 +1,36 @@
+/**
+ * ⚠️  DEPRECATED — Este servidor foi substituído pelo dashboard-next (Next.js, porta 3000).
+ *
+ * Todos os endpoints abaixo existem no Next.js dashboard:
+ *   GET  /api/state              → dashboard-next/src/app/api/state/route.ts
+ *   POST /api/status             → dashboard-next/src/app/api/status/route.ts
+ *   POST /api/checkpoint         → dashboard-next/src/app/api/checkpoint/route.ts
+ *   GET  /api/checkpoint         → dashboard-next/src/app/api/checkpoint/route.ts
+ *   POST /api/checkpoint/respond → dashboard-next/src/app/api/checkpoint/respond/route.ts
+ *   POST /api/reset              → dashboard-next/src/app/api/reset/route.ts
+ *   POST /api/command            → dashboard-next/src/app/api/command/route.ts
+ *   GET  /api/command            → dashboard-next/src/app/api/command/route.ts
+ *
+ * Além disso, o Next.js tem rotas multi-client:
+ *   GET  /api/clients
+ *   GET  /api/clients/[slug]/state
+ *   POST /api/clients/[slug]/status
+ *   POST /api/clients/[slug]/command
+ *   GET  /api/clients/[slug]/command
+ *   POST /api/clients/[slug]/checkpoint
+ *   POST /api/clients/[slug]/checkpoint/respond
+ *   GET  /api/clients/overview
+ *   POST /api/clients/active
+ *
+ * O watcher.js e notify.js já apontam pra porta 3000 (Next.js).
+ * O agentroom agora é servido pelo Next.js em page.tsx (/).
+ *
+ * Para rodar o dashboard:
+ *   cd dashboard-next && npm run dev
+ *
+ * Este arquivo é mantido apenas como referência. NÃO use em produção.
+ */
+
 const http = require('http');
 const fs = require('fs');
 const path = require('path');

@@ -1,76 +1,84 @@
 #!/usr/bin/env node
-const { spawn, execSync, exec } = require('child_process');
+/**
+ * Start — Dashboard Next.js + Watcher
+ * Sobe tudo num terminal só. Ctrl+C mata os dois.
+ */
+const { spawn } = require('child_process');
 const path = require('path');
-const fs = require('fs');
-const http = require('http');
 
-const PORT = 3000;
-const NEXT_DIR = path.join(__dirname, 'dashboard-next');
-const WATCHER_DIR = path.join(__dirname, 'dashboard');
+const ROOT = __dirname;
+const NEXT_DIR = path.join(ROOT, 'dashboard-next');
 
-function isRunning() {
-  return new Promise(resolve => {
-    const req = http.get(`http://localhost:${PORT}`, res => {
-      res.on('data', () => {});
-      res.on('end', () => resolve(true));
+const C = { reset: '\x1b[0m', cyan: '\x1b[36m', yellow: '\x1b[33m', green: '\x1b[32m', red: '\x1b[31m', dim: '\x1b[2m' };
+
+function prefix(name, color) {
+  return (data) => {
+    data.toString().split('\n').filter(l => l.trim()).forEach(line => {
+      console.log(`${color}[${name}]${C.reset} ${line}`);
     });
-    req.on('error', () => resolve(false));
-    req.setTimeout(2000, () => { req.destroy(); resolve(false); });
+  };
+}
+
+// ── 1. Next.js ──────────────────────────────────────────────────────
+console.log(`${C.cyan}[start]${C.reset} Iniciando Next.js...`);
+
+const next = spawn('npm', ['run', 'dev'], {
+  cwd: NEXT_DIR,
+  stdio: ['ignore', 'pipe', 'pipe'],
+  shell: true,
+});
+
+const logNext = prefix('next', C.green);
+const logNextErr = prefix('next', C.dim);
+next.stdout.on('data', logNext);
+next.stderr.on('data', logNextErr);
+
+// ── 2. Watcher — inicia após Next.js ou timeout de 8s ──────────────
+let watcherStarted = false;
+let watcher = null;
+
+function startWatcher() {
+  if (watcherStarted) return;
+  watcherStarted = true;
+  console.log(`${C.yellow}[start]${C.reset} Iniciando watcher...`);
+
+  watcher = spawn('node', ['dashboard/watcher.js'], {
+    cwd: ROOT,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    shell: true,
+  });
+  watcher.stdout.on('data', prefix('watcher', C.yellow));
+  watcher.stderr.on('data', prefix('watcher', C.red));
+  watcher.on('close', (code) => {
+    console.log(`${C.yellow}[watcher]${C.reset} Encerrado (exit ${code})`);
   });
 }
 
-function openBrowser(url) {
-  const cmds = { win32: `start ${url}`, darwin: `open ${url}`, linux: `xdg-open ${url}` };
-  exec(cmds[process.platform] || cmds.linux);
-}
-
-function waitForServer(retries = 60) {
-  return new Promise((resolve, reject) => {
-    let attempts = 0;
-    const check = () => {
-      isRunning().then(up => {
-        if (up) return resolve();
-        if (++attempts >= retries) return reject(new Error('Server timeout'));
-        setTimeout(check, 1000);
-      });
-    };
-    check();
-  });
-}
-
-async function main() {
-  console.log('\n  🐒 SalvaTech Social Media Squad\n');
-
-  const alreadyUp = await isRunning();
-
-  if (alreadyUp) {
-    console.log(`  Dashboard já rodando em http://localhost:${PORT}`);
-  } else {
-    // Build se não tem .next/
-    const nextBuild = path.join(NEXT_DIR, '.next');
-    if (!fs.existsSync(nextBuild)) {
-      console.log('  Buildando Next.js (primeira vez)...');
-      execSync('npx next build', { cwd: NEXT_DIR, stdio: 'inherit' });
-    }
-
-    console.log('  Subindo dashboard...');
-    const server = spawn('npx', ['next', 'start', '-p', String(PORT)], {
-      cwd: NEXT_DIR, detached: true, stdio: 'ignore', shell: true
-    });
-    server.unref();
-    await waitForServer();
-    console.log(`  Dashboard em http://localhost:${PORT}`);
+// Detectar ready em stdout E stderr (Next.js varia)
+function checkReady(data) {
+  const t = data.toString().toLowerCase();
+  if (t.includes('ready') || t.includes('started server') || t.includes('localhost:3000') || t.includes('✓ ready')) {
+    startWatcher();
   }
-
-  // Watcher
-  console.log('  Subindo watcher...');
-  const watcher = spawn('node', ['watcher.js'], {
-    cwd: WATCHER_DIR, detached: true, stdio: 'ignore'
-  });
-  watcher.unref();
-
-  openBrowser(`http://localhost:${PORT}`);
-  console.log('  Tudo pronto!\n');
 }
+next.stdout.on('data', checkReady);
+next.stderr.on('data', checkReady);
 
-main().catch(e => { console.error('Erro:', e.message); process.exit(1); });
+// Fallback: 8s
+setTimeout(() => {
+  if (!watcherStarted) {
+    console.log(`${C.cyan}[start]${C.reset} Timeout 8s — iniciando watcher`);
+    startWatcher();
+  }
+}, 8000);
+
+// ── Cleanup ─────────────────────────────────────────────────────────
+function cleanup() {
+  console.log(`\n${C.cyan}[start]${C.reset} Encerrando...`);
+  if (watcher && !watcher.killed) watcher.kill();
+  if (next && !next.killed) next.kill();
+  process.exit(0);
+}
+process.on('SIGINT', cleanup);
+process.on('SIGTERM', cleanup);
+next.on('close', (code) => { console.log(`${C.green}[next]${C.reset} Encerrado (exit ${code})`); cleanup(); });

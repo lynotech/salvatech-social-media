@@ -22,6 +22,16 @@
 - **Mascote:** Full body, standing upright, arms extended toward holographic screens, focused posture
 - **Export:** posts/2026-04-09-pme-falham-digitalizacao/export/ (slide-01 a slide-04.png)
 
+## 2026-04-10 — dados-tempo-real
+- **Tema:** Dados em tempo real: por que seu concorrente decide mais rápido que você
+- **Pilar:** PROVOCAÇÃO
+- **Canal:** Instagram
+- **Composição:** B (texto domina, imagem como fundo blur)
+- **Slides:** 4
+- **Cenário:** Futuristic mission control room, curved screens displaying live data dashboards, real-time graphs and metrics
+- **Mascote:** Three-quarter shot, seated at command console, operating holographic dashboards, cold blue + violet lighting
+- **Export:** posts/2026-04-09-dados-tempo-real/export/ (slide-01 a slide-04.png)
+
 ## 2026-04-09 — automacao-atendimento-pme
 - **Tema:** Automação no atendimento: como PMEs atendem mais com menos equipe
 - **Pilar:** VALOR PRÁTICO
